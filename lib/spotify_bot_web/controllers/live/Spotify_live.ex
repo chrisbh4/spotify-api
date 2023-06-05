@@ -15,7 +15,20 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
 
   def handle_event("btn-click", _, socket) do
-    IO.inspect("button click")
+    case HTTPoison.get(url) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        IO.puts body
+      {:ok, %HTTPoison.Response{status_code: 404}} ->
+        IO.puts "Not found :("
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        IO.inspect reason
+    end
+
     {:noreply, socket}
   end
+
+  # def handle_event("btn-click", _, socket) do
+  #   IO.inspect("button click")
+  #   {:noreply, socket}
+  # end
 end

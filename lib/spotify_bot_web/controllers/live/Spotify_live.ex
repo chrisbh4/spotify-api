@@ -31,11 +31,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
       {output, 0} ->
         # Extract the access token from the output (assuming it's in JSON format)
         access_token = Jason.decode!(output)["access_token"]
-
-        # Do something with the access token
-        # ...
-        socket = assign(socket, spotify_access_token: access_token)
-        Logger.info(spotify_access_token: socket.assigns.spotify_access_token)
+        socket = assign(socket, access_token: access_token)
         {:noreply, socket}
 
       {_, _} ->
@@ -45,20 +41,17 @@ defmodule SpotifyBotWeb.SpotifyLive do
   end
 
   def handle_event("fetch-artist", _params, socket) do
-    # Willie's url: "https://api.spotify.com/v1/artists/3UR9ghLycQXaVDNJUNH3RY?si=aQ82WY_SS4OfwWYMAQBm_A"
+    # Willie's(Moïses) url: "https://api.spotify.com/v1/artists/3UR9ghLycQXaVDNJUNH3RY?si=aQ82WY_SS4OfwWYMAQBm_A"
 
-    Logger.info(fetch: socket.assigns)
     command = "curl"
     args = [
       "https://api.spotify.com/v1/artists/3UR9ghLycQXaVDNJUNH3RY?si=aQ82WY_SS4OfwWYMAQBm_A",
-      "-H", "Authorization: Bearer #{socket.assigns.spotify_access_token}"
+      "-H", "Authorization: Bearer #{socket.assigns.access_token}"
     ]
 
     case System.cmd(command, args) do
       {output, 0} ->
-        # Process the output (e.g., parse JSON, extract relevant data)
-        # ...
-        Logger.info(output: output)
+        socket = assign(socket, artist_data: output)
         {:noreply, socket}
 
       {_, _} ->

@@ -1,22 +1,23 @@
 defmodule SpotifyBotWeb.SpotifyLive do
-  alias ElixirSense.Log
+  # alias ElixirLS.LanguageServer.Providers.FoldingRange.Token
+  # alias ElixirSense.Log
   use Phoenix.LiveView
   require Logger
 
   def render(assigns) do
     ~H"""
       <h1>Spotify API access point </h1>
-      <button phx-click="play-poison">Poison Fetch </button>
-      <button phx-click="click-me">Access API </button>
+      <button phx-click="click-me">Fetch Token </button>
       <button phx-click="fetch-artist">Fetch artist data </button>
+      <%!-- <button phx-click="play-poison">Poison Fetch </button> --%>
       <button phx-click="play-song">Play music </button>
-      <figure>
+      <%!-- <figure>
         <figcaption>Listen to the T-Rex:</figcaption>
           <audio
               controls
               src="/media/cc0-audio/t-rex-roar.mp3">
           </audio>
-      </figure>
+      </figure> --%>
     """
   end
 
@@ -25,9 +26,8 @@ defmodule SpotifyBotWeb.SpotifyLive do
   end
 
   def handle_event("click-me", _params, socket) do
-    command = "curl"
-
     # args = [
+
     #   "-X",
     #   "POST",
     #   "https://accounts.spotify.com/api/token",
@@ -36,33 +36,58 @@ defmodule SpotifyBotWeb.SpotifyLive do
     #   "-d",
     #   "grant_type=client_credentials&client_id=47b6547d58be4b5199a2d6ffdced8d39&client_secret=0672593b84b84b58aa550f6124cc4b8f"
     # ]
+  #   args = [
+  #     "-X",
+  #     "POST",
+  #     "https://accounts.spotify.com/api/token",
+  #     "-H",
+  #     "Content-Type: application/x-www-form-urlencoded",
+  #     "-d",
+  #     "grant_type=client_credentials&client_id=47b6547d58be4b5199a2d6ffdced8d39&client_secret=0672593b84b84b58aa550f6124cc4b8f",
+  #     "-d",
+  #     "scope=streaming user-read-email user-read-private"
+  # ]
 
-    args = [
-      "-X",
-      "POST",
-      "https://accounts.spotify.com/api/token",
-      "-H",
-      "Content-Type: application/x-www-form-urlencoded",
-      "-d",
-      "grant_type=client_credentials&client_id=47b6547d58be4b5199a2d6ffdced8d39&client_secret=0672593b84b84b58aa550f6124cc4b8f",
-      "-d",
-      "scope=streaming user-read-email user-read-private"
-  ]
+  url = "https://accounts.spotify.com/api/token"
+  # headers = "Content-Type: application/x-www-form-urlencoded"
+  # opts = "grant_type=client_credentials&client_id=47b6547d58be4b5199a2d6ffdced8d39&client_secret=0672593b84b84b58aa550f6124cc4b8f"
+  # client_id="47b6547d58be4b5199a2d6ffdced8d39"
+  # client_secret="0672593b84b84b58aa550f6124cc4b8f"
 
-    case System.cmd(command, args) do
-      {output, 0} ->
+  # post!(url, body, headers \\ [], options \\ []))
+  # res = HTTPoison.post(url, opts, headers)
+  # request(:post, "https://my.website.com", "{\"foo\": 3}", [{"Accept", "application/json"}])
 
-        # Extract the access token from the output (assuming it's in JSON format)
-        access_token = Jason.decode!(output)["access_token"]
-        Logger.info(JSON: Jason.decode!(output))
-        Logger.info(access_token: access_token)
-        socket = assign(socket, access_token: access_token)
-        {:noreply, socket}
+  # Fix this later to better understand
+  # res = HTTPoison.request(:post, url, %{client_id: client_id, client_secret: client_secret}, [{"Content-Type", "application/x-www-form-urlencoded"}] )
+  res = HTTPoison.request(:post, url, "grant_type=client_credentials&client_id=47b6547d58be4b5199a2d6ffdced8d39&client_secret=0672593b84b84b58aa550f6124cc4b8f", [{"Content-Type", "application/x-www-form-urlencoded"}] )
+# Logger does not work for the response
+    Logger.info(res)
+  # IO.inspect(res)
+  # IO.inspect(HTTPoison.process_request_body(res))
 
-      {_, _} ->
-        # Handle command execution errors
-        {:error, "Failed to execute the curl command."}
-    end
+  case res do
+    {:ok , data } ->
+      Logger.info("data is 200")
+      # Logger.info(res)
+
+    {:error, error} ->
+      Logger.info(error)
+  end
+
+    # case System.cmd(command, args) do
+    #   {output, 0} ->
+    #     # Extract the access token from the output (assuming it's in JSON format)
+    #     access_token = Jason.decode!(output)["access_token"]
+    #     Logger.info(JSON: Jason.decode!(output))
+    #     Logger.info(access_token: access_token)
+    #     socket = assign(socket, access_token: access_token)
+    #     {:noreply, socket}
+    #   {_, _} ->
+      #     # Handle command execution errors
+      #     {:error, "Failed to execute the curl command."}
+      # end
+    {:noreply, socket}
   end
 
   def handle_event("fetch-artist", _params, socket) do
@@ -169,7 +194,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
       "position_ms" => 0
     }
 
-
     url = "https://api.spotify.com/v1/me/player/play"
     case HTTPoison.put(url, payload, headers) do
       {:ok, %HTTPoison.Response{body: body}} ->
@@ -178,7 +202,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
       {:error, reason} ->
         {:error, reason}
     end
-
     {:noreply, socket}
   end
 

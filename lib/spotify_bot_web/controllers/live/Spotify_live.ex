@@ -10,22 +10,22 @@ defmodule SpotifyBotWeb.SpotifyLive do
       <h1>Spotify API access point </h1>
       <button phx-click="fetch-token">Fetch Token </button>
       <button phx-click="fetch-artist">Fetch artist data </button>
-      <%!-- <button phx-click="play-poison">Poison Fetch </button> --%>
-      <button phx-click="play-song">Play music </button>
+      <button phx-click="fetch-playlist">Fetch Demo Playlist</button>
+      <button phx-click="play-music">Play Music </button>
+      <%!-- <button phx-click="play-song">Play music </button> --%>
 
 
-      <%!-- <iframe
-        title="Spotify Embed: Recommendation Playlist "
-        src={"https://open.spotify.com/embed/playlist/17xiikGC51oJsPobkNRcYe?utm_source=generator&theme=0"}
+      <iframe
+        title="DEMO Player "
+        src={"https://open.spotify.com/embed/playlist/30GBe73yDNLqPBi6fJlUAi?utm_source=generator&theme=0"}
         width="100%"
         height="100%"
         class="h-auto w-1/2"
         frameBorder="0"
         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
         loading="lazy"
-      /> --%>
+      />
 
-      <%!-- <iframe style="border-radius:12px" src="https://open.spotify.com/embed/artist/3TVXtAsR1Inumwj472S9r4?utm_source=generator" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe> --%>
 
 
       <%!-- <figure>
@@ -44,7 +44,8 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
   def handle_event("fetch-token", _params, socket) do
   url = "https://accounts.spotify.com/api/token"
-  body = "grant_type=client_credentials&client_id=#{System.get_env("CLIENT_ID")}&client_secret=#{System.get_env("CLIENT_SECRET")}&scope=streaming user-read-email user-read-private"
+  scopes = "streaming user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state"
+  body = "grant_type=client_credentials&client_id=#{System.get_env("CLIENT_ID")}&client_secret=#{System.get_env("CLIENT_SECRET")}&scope=#{scopes}"
   headers = [{"Content-Type", "application/x-www-form-urlencoded"}]
 
   res = HTTPoison.post(url, body, headers)
@@ -71,7 +72,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
     # Drake (is not working for some reason)
         # url = "https://api.spotify.com/v1/artist/3TVXtAsR1Inumwj472S9r4?si=AhzZTG_RSJaX17iq3mwSnA"
 
-    url = "https://api.spotify.com/v1/artists/3UR9ghLycQXaVDNJUNH3RY?si=aQ82WY_SS4OfwWYMAQBm_A"
+    url = "https://api.spotify.com/v1/artists/0TnOYISbd1XYRBk9myaseg/top-tracks?country=US"
     res = HTTPoison.get(url, [{"Authorization:", "Bearer #{socket.assigns.access_token}"}] )
 
     case res do
@@ -80,9 +81,11 @@ defmodule SpotifyBotWeb.SpotifyLive do
         IO.inspect(Jason.decode!(body))
         {:noreply, socket}
 
-      {:ok, %{status_code: status_code}} ->
-        Logger.info("Artist data cannot be fetched")
-        Logger.info(status_code: status_code)
+        {:ok, %{status_code: status_code, body: body}} ->
+          Logger.info("Artist data cannot be fetched")
+          Logger.info(status_code: status_code)
+          Logger.info(body: body)
+          IO.inspect(Jason.decode!(body))
         {:noreply, socket}
 
       {:error , error} ->
@@ -91,7 +94,92 @@ defmodule SpotifyBotWeb.SpotifyLive do
     end
   end
 
-  def handle_event("play-song", _, socket) do
+  def handle_event("fetch-playlist", _params, socket) do
+    url = "https://api.spotify.com/v1/playlists/30GBe73yDNLqPBi6fJlUAi"
+    res = HTTPoison.get(url, [{"Authorization:", "Bearer #{socket.assigns.access_token}"}] )
+
+    case res do
+      {:ok , %{status_code: 200, body: body}} ->
+        Logger.info("200")
+        IO.inspect(Jason.decode!(body))
+        {:noreply, socket}
+
+        {:ok, %{status_code: status_code, body: body}} ->
+          Logger.info("Playlist data: cannot be fetched")
+          Logger.info(status_code: status_code)
+          IO.inspect(Jason.decode!(body))
+        {:noreply, socket}
+
+      {:error , error} ->
+        Logger.info(error)
+        {:noreply, socket}
+    end
+  end
+
+  # *Try to use HTTPoision libary to be able to stream but I need the 'Album URI' to be able to get the track I want to play
+  #  HTTPoision libary
+  def handle_event("play-music", _, socket) do
+    headers = [
+      {"Authorization", "Bearer #{socket.assigns.access_token}"},
+      {"Content-Type", "application/json"}
+    ]
+
+    body = '{
+      "context_uri": "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
+      "offset": {
+          "position": 5
+      },
+      "position_ms": 0
+  }'
+
+    url = "https://api.spotify.com/v1/me/player/play"
+
+    res = HTTPoison.put(url, body, headers)
+
+    case res do
+      {:ok , %{status_code: 200, body: body}} ->
+        IO.inspect(body)
+        {:noreply, socket}
+
+      {:ok, %{status_code: status_code}} ->
+        Logger.info('#{status_code}')
+        {:noreply, socket}
+
+      {:error, error} ->
+        Logger.info(error)
+        {:noreply, socket}
+    end
+  end
+
+
+
+  def handle_event("pause-song", _, socket) do
+    access_token = socket.assigns.access_token
+
+    command = "curl"
+
+    args = [
+      "--request",
+      "PUT",
+      "--url",
+      "https://api.spotify.com/v1/me/player/pause",
+      "--header",
+      "Authorization: Bearer #{access_token}"
+    ]
+
+    case System.cmd(command, args) do
+      {_, 0} ->
+        # Successful execution, do something if needed
+        {:noreply, socket}
+
+      {_, _} ->
+        # Handle command execution errors
+        {:error, "Failed to execute the curl command to pause the song."}
+    end
+  end
+
+  # Basic attempt
+  def handle_event("curl-cmd-play-song", _, socket) do
     access_token = socket.assigns.access_token
     album_uri = "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr"
     position = 5
@@ -122,59 +210,5 @@ defmodule SpotifyBotWeb.SpotifyLive do
         {:error, "Failed to execute the curl command to play the song."}
     end
   end
-
-  def handle_event("pause-song", _, socket) do
-    access_token = socket.assigns.access_token
-
-    command = "curl"
-
-    args = [
-      "--request",
-      "PUT",
-      "--url",
-      "https://api.spotify.com/v1/me/player/pause",
-      "--header",
-      "Authorization: Bearer #{access_token}"
-    ]
-
-    case System.cmd(command, args) do
-      {_, 0} ->
-        # Successful execution, do something if needed
-        {:noreply, socket}
-
-      {_, _} ->
-        # Handle command execution errors
-        {:error, "Failed to execute the curl command to pause the song."}
-    end
-  end
-
-  # *Try to use HTTPoision libary to be able to stream but I need the 'Album URI' to be able to get the track I want to play
-  #  HTTPoision libary
-  def handle_event("play-poison", _, socket) do
-    headers = [
-      {"Authorization", "Bearer #{socket.assigns.access_token}"},
-      {"Content-Type", "application/json"}
-    ]
-
-    payload = %{
-      # "context_uri" => album_uri,
-      "context_uri" => socket.assigns.album_uri,
-      # "offset" => %{"position" => position},
-      "offset" => %{"position" => 0},
-      "position_ms" => 0
-    }
-
-    url = "https://api.spotify.com/v1/me/player/play"
-    case HTTPoison.put(url, payload, headers) do
-      {:ok, %HTTPoison.Response{body: body}} ->
-        {:ok, body}
-
-      {:error, reason} ->
-        {:error, reason}
-    end
-    {:noreply, socket}
-  end
-
-
 
 end

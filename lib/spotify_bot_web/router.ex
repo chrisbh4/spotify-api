@@ -20,9 +20,9 @@ defmodule SpotifyBotWeb.Router do
   scope "/", SpotifyBotWeb do
     pipe_through :browser
 
-    get "/", PageController, :index
+    # get "/", PageController, :index
+    live "/", SpotifyLive
     live "/temp", ThermostatLive
-    live "spotify", SpotifyLive
   end
 
   # Other scopes may use custom stacks.

@@ -8,9 +8,10 @@ defmodule SpotifyBotWeb.SpotifyLive do
     ~H"""
 
       <h1>Spotify API access point </h1>
-      <button phx-click="fetch-token">Fetch Token </button>
-      <button phx-click="fetch-artist">Fetch artist data </button>
-      <button phx-click="fetch-playlist">Fetch Demo Playlist</button>
+      <button phx-click="fetch-token">Generate Token </button>
+      <button phx-click="fetch-artist">Artist data </button>
+      <button phx-click="fetch-top-tracks">Top Tracks </button>
+      <button phx-click="fetch-playlist"> Demo Playlist</button>
       <button phx-click="play-music">Play Music </button>
       <%!-- <button phx-click="play-song">Play music </button> --%>
 
@@ -68,11 +69,32 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
   def handle_event("fetch-artist", _params, socket) do
     # Willie
-      # url = "https://api.spotify.com/v1/artists/3UR9ghLycQXaVDNJUNH3RY?si=aQ82WY_SS4OfwWYMAQBm_A"
-    # Drake (is not working for some reason)
-        # url = "https://api.spotify.com/v1/artist/3TVXtAsR1Inumwj472S9r4?si=AhzZTG_RSJaX17iq3mwSnA"
+    # url = "https://api.spotify.com/v1/artists/3UR9ghLycQXaVDNJUNH3RY?si=aQ82WY_SS4OfwWYMAQBm_A"
+    url = "https://api.spotify.com/v1/artists/3UR9ghLycQXaVDNJUNH3RY"
+    # url = "https://api.spotify.com/v1/artists/3TVXtAsR1Inumwj472S9r4"
+    res = HTTPoison.get(url, [{"Authorization:", "Bearer #{socket.assigns.access_token}"}] )
 
-    url = "https://api.spotify.com/v1/artists/0TnOYISbd1XYRBk9myaseg/top-tracks?country=US"
+    case res do
+      {:ok , %{status_code: 200, body: body}} ->
+        Logger.info("200")
+        IO.inspect(Jason.decode!(body))
+        {:noreply, socket}
+
+        {:ok, %{status_code: status_code, body: body}} ->
+          Logger.info("Artist data cannot be fetched")
+          Logger.info(status_code: status_code)
+          Logger.info(body: body)
+          IO.inspect(Jason.decode!(body))
+        {:noreply, socket}
+
+      {:error , error} ->
+        Logger.info(error)
+        {:noreply, socket}
+    end
+  end
+
+  def handle_event("fetch-top-tracks", _params, socket) do
+    url = "https://api.spotify.com/v1/artists/3TVXtAsR1Inumwj472S9r4/top-tracks?country=US"
     res = HTTPoison.get(url, [{"Authorization:", "Bearer #{socket.assigns.access_token}"}] )
 
     case res do
@@ -118,7 +140,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
   # *Try to use HTTPoision libary to be able to stream but I need the 'Album URI' to be able to get the track I want to play
   #  HTTPoision libary
-  def handle_event("play-music", _, socket) do
+  def handle_event("play-music", _params, socket) do
     headers = [
       {"Authorization", "Bearer #{socket.assigns.access_token}"},
       {"Content-Type", "application/json"}

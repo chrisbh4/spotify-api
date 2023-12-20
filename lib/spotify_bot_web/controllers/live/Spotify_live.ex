@@ -154,6 +154,15 @@ defmodule SpotifyBotWeb.SpotifyLive do
       "position_ms": 0
   }'
 
+#! (CaseClauseError) no case clause matching: %{offset: %{position: 5}, context_uri: "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr", position_ms: 0}
+#   body = %{
+#     context_uri: "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
+#     offset: %{
+#         position: 5
+#     },
+#     position_ms: 0
+# }
+
     url = "https://api.spotify.com/v1/me/player/play"
 
     res = HTTPoison.put(url, body, headers)

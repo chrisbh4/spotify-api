@@ -1,4 +1,5 @@
 defmodule SpotifyBotWeb.SpotifyLive do
+  alias Hex.HTTP
   # alias ElixirLS.LanguageServer.Providers.FoldingRange.Token
   # alias ElixirSense.Log
   use Phoenix.LiveView
@@ -8,16 +9,18 @@ defmodule SpotifyBotWeb.SpotifyLive do
     ~H"""
 
       <h1>Spotify API access point </h1>
+      <button phx-click="auth">Auth </button>
       <button phx-click="fetch-token">Generate Token </button>
-      <button phx-click="start-timer">Start Timer </button>
+      <button phx-click="get-player">Get Play </button>
+      <%!-- <button phx-click="start-timer">Start Timer </button>
       <button phx-click="fetch-artist">Artist data </button>
       <button phx-click="fetch-top-tracks">Top Tracks </button>
-      <button phx-click="fetch-playlist"> Demo Playlist</button>
+      <button phx-click="fetch-playlist"> Demo Playlist</button> --%>
       <button phx-click="play-music">Play Music </button>
       <%!-- <button phx-click="play-song">Play music </button> --%>
 
 
-      <iframe
+      <%!-- <iframe
         title="DEMO Player "
         src={"https://open.spotify.com/embed/playlist/30GBe73yDNLqPBi6fJlUAi?utm_source=generator&theme=0"}
         width="100%"
@@ -26,7 +29,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
         frameBorder="0"
         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
         loading="lazy"
-      />
+      /> --%>
 
 
 
@@ -49,6 +52,34 @@ defmodule SpotifyBotWeb.SpotifyLive do
     {:noreply, socket}
   end
 
+
+  def handle_event("auth", _params, socket) do
+    url = "https://accounts.spotify.com/authorize"
+    # redirect_uri = "https://localhost:4000"
+    scopes = "streaming user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state"
+    body = "grant_type=client_credentials&client_id=#{System.get_env("CLIENT_ID")}&client_secret=#{System.get_env("CLIENT_SECRET")}&scope=#{scopes}"
+    headers = [{"Content-Type", "application/x-www-form-urlencoded"}]
+    res = HTTPoison.post(url, body, headers)
+
+    case res do
+      {:ok , %{status_code: 200, body: body}} ->
+        Logger.info("Auth successful ✅")
+        json_data = Jason.decode!(body)
+        IO.inspect(json_data)
+        {:noreply, socket}
+
+
+      {:ok, %{status_code: status_code, body: body}} ->
+        Logger.info(status_code: status_code)
+        Logger.info(body: body)
+        {:noreply, socket}
+
+      {:error, error} ->
+        Logger.info(error)
+        {:noreply, socket}
+      end
+  end
+
   def handle_event("fetch-token", _params, socket) do
     url = "https://accounts.spotify.com/api/token"
     scopes = "streaming user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state"
@@ -60,7 +91,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
       {:ok , %{status_code: 200, body: body}} ->
         Logger.info("Token fetched ✅")
         json_data = Jason.decode!(body)
-        {:noreply, assign(socket, :access_token, json_data["access_token"])}
+        {:noreply, assign(socket, access_token: json_data["access_token"], expires_in: json_data["expires_in"])}
 
       {:ok, %{status_code: status_code, body: body}} ->
         Logger.info(status_code: status_code)
@@ -77,7 +108,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
     # Willie
     # url = "https://api.spotify.com/v1/artists/3UR9ghLycQXaVDNJUNH3RY?si=aQ82WY_SS4OfwWYMAQBm_A"
     url = "https://api.spotify.com/v1/artists/3UR9ghLycQXaVDNJUNH3RY"
-    # url = "https://api.spotify.com/v1/artists/3TVXtAsR1Inumwj472S9r4"
     res = HTTPoison.get(url, [{"Authorization:", "Bearer #{socket.assigns.access_token}"}] )
 
     case res do
@@ -101,7 +131,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
   def handle_event("fetch-top-tracks", _params, socket) do
     url = "https://api.spotify.com/v1/artists/3TVXtAsR1Inumwj472S9r4/top-tracks?country=US"
-    res = HTTPoison.get(url, [{"Authorization:", "Bearer #{socket.assigns.access_token}"}] )
+    res = HTTPoison.get(url, [{"Authorization:", "Bearer #{socket.assigns.access_token}"}])
 
     case res do
       {:ok , %{status_code: 200, body: body}} ->
@@ -188,65 +218,29 @@ defmodule SpotifyBotWeb.SpotifyLive do
     end
   end
 
+def handle_event("get-player", _params, socket) do
+  url = "https://api.spotify.com/v1/me/player/devices"
+  res = HTTPoison.get(url, [{"Authorization", "Bearer #{socket.assigns.access_token}"}])
+  case res do
+    {:ok , %{status_code: 200, body: body}} ->
+      IO.inspect(body)
+      {:noreply, socket}
 
+    {:ok, %{status_code: status_code, body: body}} ->
+      Logger.info('#{status_code}')
+      Logger.info(body)
+      {:noreply, socket}
 
-  def handle_event("pause-song", _, socket) do
-    access_token = socket.assigns.access_token
-
-    command = "curl"
-
-    args = [
-      "--request",
-      "PUT",
-      "--url",
-      "https://api.spotify.com/v1/me/player/pause",
-      "--header",
-      "Authorization: Bearer #{access_token}"
-    ]
-
-    case System.cmd(command, args) do
-      {_, 0} ->
-        # Successful execution, do something if needed
-        {:noreply, socket}
-
-      {_, _} ->
-        # Handle command execution errors
-        {:error, "Failed to execute the curl command to pause the song."}
-    end
+    {:error, error} ->
+      Logger.info(error)
+      {:noreply, socket}
   end
 
-  # Basic attempt
-  def handle_event("curl-cmd-play-song", _, socket) do
-    access_token = socket.assigns.access_token
-    album_uri = "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr"
-    position = 5
-    position_ms = 0
+  {:noreply, socket}
+end
 
-    command = "curl"
-
-    args = [
-      "--request",
-      "PUT",
-      "--url",
-      "https://api.spotify.com/v1/me/player/play",
-      "--header",
-      "Authorization: Bearer #{access_token}",
-      "--header",
-      "Content-Type: application/json",
-      "--data",
-      "{\"context_uri\": \"#{album_uri}\", \"offset\": {\"position\": #{position}}, \"position_ms\": #{position_ms}}"
-    ]
-
-    case System.cmd(command, args) do
-      {output, 0} ->
-        Logger.info(Song_Played: output)
-        {:noreply, socket}
-
-      {_, _} ->
-        # Handle command execution errors
-        {:error, "Failed to execute the curl command to play the song."}
-    end
-  end
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                                                  # Helper Functions
 
 
 

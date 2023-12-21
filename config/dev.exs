@@ -2,7 +2,7 @@ import Config
 
 # Configure your database
 config :spotify_bot, SpotifyBot.Repo,
-  username: "spotify_bot_user",
+  username: "spotify_api_user",
   password: "postgres",
   hostname: "localhost",
   database: "spotify_bot_db",

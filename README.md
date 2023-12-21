@@ -18,3 +18,13 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
   * Forum: https://elixirforum.com/c/phoenix-forum
   * Source: https://github.com/phoenixframework/phoenix
 # spotify-api
+
+
+# Fetches Web Token
+curl -X POST "https://accounts.spotify.com/api/token" \
+     -H "Content-Type: application/x-www-form-urlencoded" \
+     -d "grant_type=client_credentials&client_id=ae9e634bde02464480b62fa124143558&client_secret=b647f587af054503a8b96c5e1c890607"
+
+# Fetches Willies spotify data artist/:id
+ curl "https://api.spotify.com/v1/artists/3UR9ghLycQXaVDNJUNH3RY?si=aQ82WY_SS4OfwWYMAQBm_A" \
+     -H "Authorization: Bearer  BQDtH-Ty-9hf8LtyWU5m0Hr93lp6vqM7i38YU6rTioqdgXwqMoPOYkQrxH0CIsFvET-xz-qG1wJQr8n7lymIxUEb9z2c0LFelkW_Yt1LANAW29MENqo"

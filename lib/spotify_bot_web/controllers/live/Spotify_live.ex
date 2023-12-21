@@ -53,6 +53,9 @@ defmodule SpotifyBotWeb.SpotifyLive do
   end
 
 
+  # https://developer.spotify.com/documentation/web-api/tutorials/code-flow
+  # https://community.spotify.com/t5/Spotify-for-Developers/Invalid-username-cant-get-devices/td-p/5193469
+  # https://developer.spotify.com/documentation/web-api/reference/get-a-users-available-devices
   def handle_event("auth", _params, socket) do
     url = "https://accounts.spotify.com/authorize"
     # redirect_uri = "https://localhost:4000"

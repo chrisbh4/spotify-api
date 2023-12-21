@@ -250,6 +250,9 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
 
 
+# Create a timer function for when the access token expires or is nil it will trigger a new fetch and assign the the correct values from the %Token{} into the socket
+# This will then trigger another function to stream the song every 32 seconds and once that time is done trigger it to play again until the :access_token expires,
+# once the access token expires it will trigger the timer function again to fetch a new token and then play the song again (recursively)
 
   def timer_func() do
     :erlang.start_timer(2000, self(), :fetch_token)

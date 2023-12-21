@@ -9,6 +9,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
       <h1>Spotify API access point </h1>
       <button phx-click="fetch-token">Generate Token </button>
+      <button phx-click="start-timer">Start Timer </button>
       <button phx-click="fetch-artist">Artist data </button>
       <button phx-click="fetch-top-tracks">Top Tracks </button>
       <button phx-click="fetch-playlist"> Demo Playlist</button>
@@ -43,48 +44,33 @@ defmodule SpotifyBotWeb.SpotifyLive do
     {:ok, socket}
   end
 
-
-  def timer_func() do
-    :erlang.start_timer(2000, self(), :fetch_token)
-  end
-
-
-  def handle_info(:fetch_token, socket) do
-    Logger.info("Timer Info called")
-    {:noreply, socket}
-  end
-# So why is the timer pattern matching on :timeout and not :fetch_token??
-  # Is that how start_timer works or am I missing something (need to read the docs more)
-  def handle_info({:timeout, data, :fetch_token}, socket) do
-    Logger.info(':timeout')
-    IO.inspect(data)
+  def handle_event("start-timer", _params, socket) do
+    timer_func()
     {:noreply, socket}
   end
 
   def handle_event("fetch-token", _params, socket) do
-  url = "https://accounts.spotify.com/api/token"
-  scopes = "streaming user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state"
-  body = "grant_type=client_credentials&client_id=#{System.get_env("CLIENT_ID")}&client_secret=#{System.get_env("CLIENT_SECRET")}&scope=#{scopes}"
-  headers = [{"Content-Type", "application/x-www-form-urlencoded"}]
+    url = "https://accounts.spotify.com/api/token"
+    scopes = "streaming user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state"
+    body = "grant_type=client_credentials&client_id=#{System.get_env("CLIENT_ID")}&client_secret=#{System.get_env("CLIENT_SECRET")}&scope=#{scopes}"
+    headers = [{"Content-Type", "application/x-www-form-urlencoded"}]
 
-  timer_func()
+    res = HTTPoison.post(url, body, headers)
+    case res do
+      {:ok , %{status_code: 200, body: body}} ->
+        Logger.info("Token fetched ✅")
+        json_data = Jason.decode!(body)
+        {:noreply, assign(socket, :access_token, json_data["access_token"])}
 
-  res = HTTPoison.post(url, body, headers)
-  case res do
-    {:ok , %{status_code: 200, body: body}} ->
-      Logger.info("Token fetched ✅")
-      json_data = Jason.decode!(body)
-      {:noreply, assign(socket, :access_token, json_data["access_token"])}
+      {:ok, %{status_code: status_code, body: body}} ->
+        Logger.info(status_code: status_code)
+        Logger.info(body: body)
+        {:noreply, socket}
 
-    {:ok, %{status_code: status_code, body: body}} ->
-      Logger.info(status_code: status_code)
-      Logger.info(body: body)
-      {:noreply, socket}
-
-    {:error, error} ->
-      Logger.info(error)
-      {:noreply, socket}
-    end
+      {:error, error} ->
+        Logger.info(error)
+        {:noreply, socket}
+      end
   end
 
   def handle_event("fetch-artist", _params, socket) do
@@ -261,5 +247,47 @@ defmodule SpotifyBotWeb.SpotifyLive do
         {:error, "Failed to execute the curl command to play the song."}
     end
   end
+
+
+
+
+  def timer_func() do
+    :erlang.start_timer(2000, self(), :fetch_token)
+  end
+
+  def handle_info({:timeout, _data, :fetch_token}, socket) do
+    Logger.info('Timer Finished')
+    fetch_token(socket)
+
+    {:noreply, socket}
+  end
+
+  def fetch_token(socket) do
+  url = "https://accounts.spotify.com/api/token"
+  scopes = "streaming user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state"
+  body = "grant_type=client_credentials&client_id=#{System.get_env("CLIENT_ID")}&client_secret=#{System.get_env("CLIENT_SECRET")}&scope=#{scopes}"
+  headers = [{"Content-Type", "application/x-www-form-urlencoded"}]
+
+  res = HTTPoison.post(url, body, headers)
+  case res do
+    {:ok , %{status_code: 200, body: body}} ->
+      Logger.info("Token fetched ✅")
+      json_data = Jason.decode!(body)
+      {:noreply, assign(socket, :access_token, json_data["access_token"])}
+
+    {:ok, %{status_code: status_code, body: body}} ->
+      Logger.info(status_code: status_code)
+      Logger.info(body: body)
+      {:noreply, socket}
+
+    {:error, error} ->
+      Logger.info(error)
+      {:noreply, socket}
+    end
+  end
+
+
+
+
 
 end

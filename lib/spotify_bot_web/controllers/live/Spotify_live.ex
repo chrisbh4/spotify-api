@@ -99,7 +99,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
 # Authorization Code Flow fetch token
   def handle_event("fetch-token", _params, socket) do
-    IO.inspect(token_code: socket.assigns.code)
+    # IO.inspect(token_code: socket.assigns.code)
     url = "https://accounts.spotify.com/api/token"
     body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:4000"
     headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
@@ -123,17 +123,20 @@ defmodule SpotifyBotWeb.SpotifyLive do
   end
 
   def handle_event("refresh-token", _params, socket) do
+    IO.inspect(socket.assigns.access_token)
     url = "https://accounts.spotify.com/api/token"
-    body = "grant_type=refresh_token&refresh_token=#{socket.assigns.refresh_token}&client_id=#{System.get_env("CLIENT_ID")}"
-    headers = [{"Content-Type", "application/x-www-form-urlencoded"}]
+    # body = "grant_type=refresh_token&refresh_token=#{socket.assigns.refresh_token}&client_id=#{System.get_env("CLIENT_ID")}"
+    body = "grant_type=refresh_token&refresh_token=#{socket.assigns.refresh_token}"
+    headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
     # body = %{grant_type: "refresh_token", refresh_token: refresh_token, client_id: System.get_env("CLIENT_ID")}
 
     res = HTTPoison.post(url, body, headers)
+    # IO.inspect(res)
+
     case res do
       {:ok , %{status_code: 200, body: body}} ->
         Logger.info("Refreshed Token ✅")
         json_data = Jason.decode!(body)
-        IO.inspect(json_data["expires_in"])
         {:noreply, assign(socket, access_token: json_data["access_token"], expires_in: json_data["expires_in"])}
 
       {:ok, %{status_code: status_code, body: body}} ->
@@ -297,7 +300,6 @@ def handle_event("get-player", _params, socket) do
 
     {:ok, %{status_code: status_code, body: body}} ->
       Logger.info('#{status_code}')
-      Logger.info(body)
       {:noreply, socket}
 
     {:error, error} ->

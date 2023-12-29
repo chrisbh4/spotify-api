@@ -8,7 +8,8 @@ defmodule SpotifyBotWeb.SpotifyLive do
     ~H"""
       <div class='flex justify-center w-full bg-red-500 '>
       <h1>Spotify API access point </h1>
-      <button phx-click="auth-flow">Auth Flow </button>
+      <%!-- <button phx-click="auth-flow">Auth Flow </button> --%>
+      <button phx-click="pkce-auth">PKCE Auth </button>
       <button phx-click="fetch-token">Generate Token </button>
       <%!-- <button phx-click="refresh-token">Refresh Token </button> --%>
       <button phx-click="get-devices">Get Device </button>
@@ -23,9 +24,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
       </div>
     """
   end
-  # https://developer.spotify.com/documentation/web-api/tutorials/code-flow
-  # https://community.spotify.com/t5/Spotify-for-Developers/Invalid-username-cant-get-devices/td-p/5193469
-  # https://developer.spotify.com/documentation/web-api/reference/get-a-users-available-devices
 
   def mount(_params, _, socket) do
     {:ok, socket}
@@ -154,6 +152,60 @@ defmodule SpotifyBotWeb.SpotifyLive do
   #       {:noreply, socket}
   #     end
   # end
+
+
+  def handle_event("pkce-auth", _params, socket) do
+    code_challenge = generate_hash_and_base64()
+    url = "https://accounts.spotify.com/authorize"
+    redirect_uri = "http://localhost:4000"
+    scope = "user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state streaming user-read-currently-playing"
+    state = for _ <- 1..16, into: "", do: <<Enum.random('0123456789abcdef')>>
+
+    query_params = [
+      response_type: "code",
+      client_id: System.get_env("CLIENT_ID"),
+      scope: scope,
+      code_challenge_method: "S256",
+      code_challenge: code_challenge,
+      redirect_uri: redirect_uri,
+      state: state
+    ]
+    |> URI.encode_query()
+
+    res = HTTPoison.get(url, query_params)
+    # res = HTTPoison.get("#{url}#{query_params}")
+
+    case res do
+      {:ok , %{status_code: 200, body: body}} ->
+        Logger.info("PKCE successful ✅")
+        json_data = Jason.decode!(body)
+        IO.inspect(json_data)
+        {:noreply, socket}
+
+      {:ok, %{status_code: status_code, body: body}} ->
+        Logger.info(status_code: status_code)
+        IO.inspect(body)
+        {:noreply, socket}
+
+      {:error, error} ->
+        Logger.info(error)
+        {:noreply, socket}
+    end
+
+    {:noreply, socket}
+  end
+# Need to fix this :erlang.crypto undefined error
+  defp generate_hash_and_base64() do
+    # Randomize the string
+    value = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+    # Value might need to be 64 chars?
+    :crypto.hash(:sha256, value)
+    |>IO.inspect()
+    |> Base.encode64()
+    |>IO.inspect()
+
+  end
+
 
   def handle_event("fetch-artist", _params, socket) do
     # Willie

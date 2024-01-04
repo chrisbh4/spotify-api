@@ -382,14 +382,30 @@ defmodule SpotifyBotWeb.SpotifyLive do
     :erlang.start_timer(2000, self(), :fetch_token)
   end
 
-  # Create another timer function that plays the song on a 32 second loop
-  def handle_info({:timeout, _data, :fetch_token}, socket) do
+
+  def play_song_on_a_loop() do
+    # :erlang.start_timer(32000, self(), :loop_song)
+    :erlang.start_timer(10000, self(), :loop_song)
+  end
+
+  # Will Trigger play song then RE-TRIGGER the play_song_on_a_loop function
+    # Set Loop-playback inside of a case statment that checks if the access_token is nil or not
+    # if nil then trigger the re-fresh token function then start loop again else just play the song with the loop
+  def handle_info({:timeout, _data, :loop_song}, socket) do
+    play_song(socket)
+    play_song_on_a_loop()
+    {:noreply, socket}
+  end
+
+  def handle_info({:timeout, data, :fetch_token}, socket) do
     Logger.info('Timer Finished')
+    socket = assign(socket, timer_id: data)
     token = fetch_token(socket)
     case token do
       {:noreply, socket} ->
-        Logger.info("Token Timer ✅")
+        Logger.info("Token with Timer ✅")
         play_song(socket)
+        play_song_on_a_loop()
         {:noreply, socket}
 
       _->

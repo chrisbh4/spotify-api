@@ -8,19 +8,23 @@ defmodule SpotifyBotWeb.SpotifyLive do
     ~H"""
       <div class='flex justify-center w-full bg-red-500 '>
       <h1>Spotify API access point </h1>
-      <%!-- <button phx-click="pkce-auth">PKCE Auth Flow </button> --%>
       <button phx-click="auth-flow">Authentication Flow </button>
+      <button phx-click="start-timer">Start Timer </button>
+    <%!--
+      <button phx-click="pkce-auth">PKCE Auth Flow </button>
       <button phx-click="fetch-token">Generate Token </button>
       <button phx-click="refresh-token">Refresh Token </button>
       <button phx-click="get-devices">Get Device </button>
-      <%!-- <button phx-click="start-timer">Start Timer </button>
+    --%>
+    <%!--
       <button phx-click="fetch-artist">Artist data </button>
       <button phx-click="fetch-top-tracks">Top Tracks </button>
-      <button phx-click="fetch-playlist"> Demo Playlist</button> --%>
-      <%!-- <button phx-click="get-currently-playing">Currently Playing </button> --%>
-      <%!-- <button phx-click="fetch-queue">Fetch Queue </button> --%>
+      <button phx-click="fetch-playlist"> Demo Playlist</button>
+      <button phx-click="get-currently-playing">Currently Playing </button>
+      <button phx-click="fetch-queue">Fetch Queue </button>
       <button phx-click="play-music">Play Music </button>
-      <%!-- <button phx-click="play-song">Play music </button> --%>
+      <button phx-click="play-song">Play music </button>
+    --%>
       </div>
     """
   end
@@ -61,8 +65,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
     res = HTTPoison.get("#{url}#{query_params}")
 
-    # if headers comes back and contains "request_url" or "location" then do a fetch get request and see what the body or res contains
-    # This is returning a status 303 with a redurect_url
     case res do
       {:ok , %{status_code: 200, body: body}} ->
         Logger.info("Auth successful ✅")
@@ -73,39 +75,14 @@ defmodule SpotifyBotWeb.SpotifyLive do
       {:ok, %{status_code: status_code, body: _body, request_url: request_url}} ->
         Logger.info(status_code: status_code)
         Logger.info(request_url)
-        {:noreply, socket}
+        # {:noreply, socket}
+        {:noreply, redirect(socket, external: request_url)}
 
       {:error, error} ->
         Logger.info(error)
         {:noreply, socket}
       end
   end
-
-  # Authorization Code Flow fetch token // Single Grant token only this is why it is refreshing everytime
-  def handle_event("fetch-token", _params, socket) do
-    url = "https://accounts.spotify.com/api/token"
-    body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:4000"
-    headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
-
-    res = HTTPoison.post(url, body, headers)
-    case res do
-      {:ok , %{status_code: 200, body: body}} ->
-        Logger.info("Auth Token with Code fetched ✅")
-        json_data = Jason.decode!(body)
-        {:noreply, assign(socket, access_token: json_data["access_token"], expires_in: json_data["expires_in"], refresh_token: json_data["refresh_token"])}
-
-      {:ok, %{status_code: status_code, body: body}} ->
-        Logger.info(status_code: status_code)
-        Logger.info(body: body)
-        {:noreply, socket}
-
-      {:error, error} ->
-        Logger.info(error)
-        {:noreply, socket}
-      end
-  end
-
-
 
   # The new token is being set correctly but now I need to implement this to work with the timer
   def handle_event("refresh-token", _params, socket) do
@@ -201,59 +178,59 @@ defmodule SpotifyBotWeb.SpotifyLive do
     end
   end
 
-  def handle_event("play-music", _params, socket) do
-    # Macbook App
-    url = "https://api.spotify.com/v1/me/player/play?device_id=9f178b17255f6334556f45148bc1fa3a564ee14e"
-    # Chrome Web Player
-    # url = "https://api.spotify.com/v1/me/player/play?device_id=438a73099346ce1736084c4ba4bc7f01e00a940f"
-    headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}, {"Content-Type", "application/json"}]
-    # offset: is the position of the song in the album in array format starting at 0
-    body = '{
-      "context_uri": "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
-      "offset": {
-          "position": 4
-      },
-      "position_ms": 0
-    }'
+  # def handle_event("play-music", _params, socket) do
+  #   # Macbook App
+  #   url = "https://api.spotify.com/v1/me/player/play?device_id=9f178b17255f6334556f45148bc1fa3a564ee14e"
+  #   # Chrome Web Player
+  #   # url = "https://api.spotify.com/v1/me/player/play?device_id=438a73099346ce1736084c4ba4bc7f01e00a940f"
+  #   headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}, {"Content-Type", "application/json"}]
+  #   # offset: is the position of the song in the album in array format starting at 0
+  #   body = '{
+  #     "context_uri": "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
+  #     "offset": {
+  #         "position": 4
+  #     },
+  #     "position_ms": 0
+  #   }'
 
-    res = HTTPoison.put(url, body, headers)
-    case res do
-      {:ok , %{status_code: 204}} ->
-        Logger.info("Playback started ✅")
-        {:noreply, socket}
+  #   res = HTTPoison.put(url, body, headers)
+  #   case res do
+  #     {:ok , %{status_code: 204}} ->
+  #       Logger.info("Playback started ✅")
+  #       {:noreply, socket}
 
-      {:ok, %{status_code: status_code, body: body}} ->
-        Logger.info("Playback failed ❌")
-        Logger.info(status_code: status_code)
-        IO.inspect(body)
-        {:noreply, socket}
+  #     {:ok, %{status_code: status_code, body: body}} ->
+  #       Logger.info("Playback failed ❌")
+  #       Logger.info(status_code: status_code)
+  #       IO.inspect(body)
+  #       {:noreply, socket}
 
-      {:error, error} ->
-        Logger.info(error)
-        {:noreply, socket}
-    end
-  end
+  #     {:error, error} ->
+  #       Logger.info(error)
+  #       {:noreply, socket}
+  #   end
+  # end
 
-  def handle_event("get-devices", _params, socket) do
-    url = "https://api.spotify.com/v1/me/player/devices"
-    res = HTTPoison.get(url, [{"Authorization", "Bearer #{socket.assigns.access_token}"}])
-    case res do
-      {:ok , %{status_code: 200, body: body}} ->
-        Logger.info("Devices fetched ✅")
-        IO.inspect(Jason.decode!(body))
-        {:noreply, socket}
+  # def handle_event("get-devices", _params, socket) do
+  #   url = "https://api.spotify.com/v1/me/player/devices"
+  #   res = HTTPoison.get(url, [{"Authorization", "Bearer #{socket.assigns.access_token}"}])
+  #   case res do
+  #     {:ok , %{status_code: 200, body: body}} ->
+  #       Logger.info("Devices fetched ✅")
+  #       IO.inspect(Jason.decode!(body))
+  #       {:noreply, socket}
 
-      {:ok, %{status_code: status_code, body: body}} ->
-        Logger.info("Devices fetch failed ❌")
-        Logger.info(status_code: status_code)
-        IO.inspect(body)
-        {:noreply, socket}
+  #     {:ok, %{status_code: status_code, body: body}} ->
+  #       Logger.info("Devices fetch failed ❌")
+  #       Logger.info(status_code: status_code)
+  #       IO.inspect(body)
+  #       {:noreply, socket}
 
-      {:error, error} ->
-        Logger.info(error)
-        {:noreply, socket}
-    end
-  end
+  #     {:error, error} ->
+  #       Logger.info(error)
+  #       {:noreply, socket}
+  #   end
+  # end
 
   def handle_event("get-currently-playing", _params, socket) do
     url = "https://api.spotify.com/v1/me/player/currently-playing"
@@ -400,39 +377,83 @@ defmodule SpotifyBotWeb.SpotifyLive do
   # This will then trigger another function to stream the song every 32 seconds and once that time is done trigger it to play again until the :access_token expires,
   # once the access token expires it will trigger the timer function again to fetch a new token and then play the song again (recursively)
 
+  # Fetches the token on a timer
   def timer_func() do
     :erlang.start_timer(2000, self(), :fetch_token)
   end
 
+  # Create another timer function that plays the song on a 32 second loop
   def handle_info({:timeout, _data, :fetch_token}, socket) do
     Logger.info('Timer Finished')
-    fetch_token(socket)
-    {:noreply, socket}
+    token = fetch_token(socket)
+    case token do
+      {:noreply, socket} ->
+        Logger.info("Token Timer ✅")
+        play_song(socket)
+        {:noreply, socket}
+
+      _->
+        Logger.info("Token Timer ❌")
+        {:noreply, socket}
+    end
   end
 
   def fetch_token(socket) do
-  url = "https://accounts.spotify.com/api/token"
-  scopes = "streaming user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state"
-  body = "grant_type=client_credentials&client_id=#{System.get_env("CLIENT_ID")}&client_secret=#{System.get_env("CLIENT_SECRET")}&scope=#{scopes}"
-  headers = [{"Content-Type", "application/x-www-form-urlencoded"}]
+    url = "https://accounts.spotify.com/api/token"
+    body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:4000"
+    headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
 
-  res = HTTPoison.post(url, body, headers)
-  case res do
-    {:ok , %{status_code: 200, body: body}} ->
-      Logger.info("Token fetched ✅")
-      json_data = Jason.decode!(body)
-      {:noreply, assign(socket, :access_token, json_data["access_token"])}
+    res = HTTPoison.post(url, body, headers)
+    case res do
+      {:ok , %{status_code: 200, body: body}} ->
+        Logger.info("Auth Token with Code fetched ✅")
+        json_data = Jason.decode!(body)
+        {:noreply, assign(socket, access_token: json_data["access_token"], expires_in: json_data["expires_in"], refresh_token: json_data["refresh_token"])}
 
-    {:ok, %{status_code: status_code, body: body}} ->
-      Logger.info(status_code: status_code)
-      Logger.info(body: body)
-      {:noreply, socket}
+      {:ok, %{status_code: status_code, body: body}} ->
+        Logger.info(status_code: status_code)
+        Logger.info(body: body)
+        {:noreply, socket}
 
-    {:error, error} ->
-      Logger.info(error)
-      {:noreply, socket}
+      {:error, error} ->
+        Logger.info(error)
+        {:noreply, socket}
+      end
+  end
+
+  def play_song(socket) do
+    # Macbook App
+    url = "https://api.spotify.com/v1/me/player/play?device_id=9f178b17255f6334556f45148bc1fa3a564ee14e"
+    headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}, {"Content-Type", "application/json"}]
+    # offset: is the position of the song in the album in array format starting at 0
+    body = '{
+      "context_uri": "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
+      "offset": {
+          "position": 4
+      },
+      "position_ms": 0
+    }'
+
+    res = HTTPoison.put(url, body, headers)
+    case res do
+      {:ok , %{status_code: 204}} ->
+        Logger.info("Playback started ✅")
+        {:noreply, socket}
+
+      {:ok, %{status_code: status_code, body: body}} ->
+        Logger.info("Playback failed ❌")
+        Logger.info(status_code: status_code)
+        IO.inspect(body)
+        {:noreply, socket}
+
+      {:error, error} ->
+        Logger.info(error)
+        {:noreply, socket}
     end
   end
+
+
+
 
   @charset "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
   def generate_random_string(length) do
@@ -455,3 +476,29 @@ defmodule SpotifyBotWeb.SpotifyLive do
   end
 
 end
+
+
+
+  # Authorization Code Flow fetch token // Single Grant token only this is why it is refreshing everytime
+  # def handle_event("fetch-token", _params, socket) do
+  #   url = "https://accounts.spotify.com/api/token"
+  #   body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:4000"
+  #   headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
+
+  #   res = HTTPoison.post(url, body, headers)
+  #   case res do
+  #     {:ok , %{status_code: 200, body: body}} ->
+  #       Logger.info("Auth Token with Code fetched ✅")
+  #       json_data = Jason.decode!(body)
+  #       {:noreply, assign(socket, access_token: json_data["access_token"], expires_in: json_data["expires_in"], refresh_token: json_data["refresh_token"])}
+
+  #     {:ok, %{status_code: status_code, body: body}} ->
+  #       Logger.info(status_code: status_code)
+  #       Logger.info(body: body)
+  #       {:noreply, socket}
+
+  #     {:error, error} ->
+  #       Logger.info(error)
+  #       {:noreply, socket}
+  #     end
+  # end

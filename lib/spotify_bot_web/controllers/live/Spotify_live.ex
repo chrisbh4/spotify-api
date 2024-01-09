@@ -10,6 +10,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
       <h1>Spotify API access point </h1>
       <button phx-click="auth-flow">Authentication Flow </button>
       <button phx-click="start-timer">Start Timer </button>
+      <button phx-click="kill-timer">Stop Timer </button>
     <%!--
       <button phx-click="fetch-token">Generate Token </button>
       <button phx-click="play-music">Play Music </button>
@@ -48,7 +49,12 @@ defmodule SpotifyBotWeb.SpotifyLive do
   end
 
   def handle_event("start-timer", _params, socket) do
-    timer_func()
+    start_timer()
+    {:noreply, socket}
+  end
+
+  def handle_event("kill-timer", _params, socket) do
+    kill_timer_loop(socket)
     {:noreply, socket}
   end
 
@@ -79,8 +85,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
       {:ok, %{status_code: status_code, body: _body, request_url: request_url}} ->
         Logger.info(status_code: status_code)
-        Logger.info(request_url)
-        # {:noreply, socket}
         {:noreply, redirect(socket, external: request_url)}
 
       {:error, error} ->
@@ -304,6 +308,20 @@ defmodule SpotifyBotWeb.SpotifyLive do
     end
   end
 
+  def handle_info({:timeout, _data, :fetch_token}, socket) do
+    token = fetch_token(socket)
+    case token do
+      {:noreply, socket} ->
+        Logger.info("Token & Timer ✅")
+        play_song_on_a_loop(socket)
+        {:noreply, socket}
+    end
+  end
+  
+  def handle_info({:timeout, _data, :loop_song}, socket) do
+    play_song(socket)
+  end
+
 
   # ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
                                                   # Helper Functions
@@ -312,36 +330,18 @@ defmodule SpotifyBotWeb.SpotifyLive do
   # once the access token expires it will trigger the timer function again to fetch a new token and then play the song again (recursively)
 
   # Fetches the token on a timer
-  def timer_func() do
+  def start_timer() do
     :erlang.start_timer(2000, self(), :fetch_token)
   end
 
-  def play_song_on_a_loop() do
-    :erlang.start_timer(32000, self(), :loop_song)
-    # :erlang.start_timer(10000, self(), :loop_song)
+  def kill_timer_loop(socket) do
+    :erlang.cancel_timer(socket.assigns.timer_ref)
+    Logger.info("Timer stopped")
   end
 
-  def handle_info({:timeout, _data, :loop_song}, socket) do
-    play_song(socket)
-    play_song_on_a_loop()
-    {:noreply, socket}
-  end
-
-  def handle_info({:timeout, data, :fetch_token}, socket) do
-    Logger.info('Timer Finished')
-    socket = assign(socket, timer_id: data)
-    token = fetch_token(socket)
-    case token do
-      {:noreply, socket} ->
-        Logger.info("Token with Timer ✅")
-        play_song(socket)
-        play_song_on_a_loop()
-        {:noreply, socket}
-
-      _->
-        Logger.info("Token Timer ❌")
-        {:noreply, socket}
-    end
+  def play_song_on_a_loop(socket) do
+    timer_ref = :erlang.start_timer(3000, self(), :loop_song)
+    assign(socket, timer_ref: timer_ref)
   end
 
   def fetch_token(socket) do
@@ -368,7 +368,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
   end
 
   def play_song(socket) do
-    # Macbook App
     url = "https://api.spotify.com/v1/me/player/play?device_id=9f178b17255f6334556f45148bc1fa3a564ee14e"
     headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}, {"Content-Type", "application/json"}]
     body = '{
@@ -383,6 +382,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
     case res do
       {:ok , %{status_code: 204}} ->
         Logger.info("Playback started ✅")
+        socket = play_song_on_a_loop(socket)
         {:noreply, socket}
 
       {:ok, %{status_code: 401}} ->
@@ -413,7 +413,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
       {:ok , %{status_code: 200, body: body}} ->
         Logger.info("Token Refreshed ✅")
         json_data = Jason.decode!(body)
-        play_song_on_a_loop()
+        play_song_on_a_loop(socket)
         {:noreply, assign(socket, access_token: json_data["access_token"], expires_in: json_data["expires_in"])}
 
       {:ok, %{status_code: status_code, body: body}} ->
@@ -426,8 +426,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
         {:noreply, socket}
       end
   end
-
-
 
   @charset "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
   def generate_random_string(length) do
@@ -444,7 +442,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
   def generate_hash_and_base64(code_verifier) do
     :crypto.hash(:sha256, code_verifier)
-    |> IO.inspect()
     |> Base.url_encode64()
     |> String.trim_trailing("=")
   end

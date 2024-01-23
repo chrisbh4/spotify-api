@@ -37,7 +37,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
   def handle_params(params, _uri, socket) do
     case params["code"] do
       nil ->
-        Logger.info("Auth :code is nil ❌")
+        # Logger.info("Auth :code is nil ❌")
         socket = assign(socket, code: nil, state: nil)
         {:noreply, socket}
 
@@ -317,7 +317,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
         {:noreply, socket}
     end
   end
-  
+
   def handle_info({:timeout, _data, :loop_song}, socket) do
     play_song(socket)
   end

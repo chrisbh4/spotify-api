@@ -61,7 +61,8 @@ defmodule SpotifyBotWeb.SpotifyLive do
   # Authorization Code Flow: Single Grant token only this is why it is refreshing everytime
   def handle_event("auth-flow", _params, socket) do
     url = "https://accounts.spotify.com/authorize?"
-    redirect_uri = "http://localhost:4000"
+    # redirect_uri = "http://localhost:4000"
+    redirect_uri = "https://spotify-api.fly.dev"
     scope = "user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state streaming user-read-currently-playing"
     state = for _ <- 1..16, into: "", do: <<Enum.random('0123456789abcdef')>>
 
@@ -96,7 +97,8 @@ defmodule SpotifyBotWeb.SpotifyLive do
   # Authorization Code Flow fetch token // Single Grant token only this is why it is refreshing everytime
   def handle_event("fetch-token", _params, socket) do
     url = "https://accounts.spotify.com/api/token"
-    body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:4000"
+    # body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:4000"
+    body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=https://spotify-api.fly.dev"
     headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
 
     res = HTTPoison.post(url, body, headers)
@@ -346,7 +348,8 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
   def fetch_token(socket) do
     url = "https://accounts.spotify.com/api/token"
-    body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:4000"
+    # body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:4000"
+    body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=https://spotify-api.fly.dev"
     headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
 
     res = HTTPoison.post(url, body, headers)

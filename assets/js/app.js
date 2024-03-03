@@ -26,8 +26,49 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
+let Hooks = {}
+
+Hooks.SpotifyPlayer = {
+    mounted() {
+        console.log("Inside mount")
+        const playerElement = document.getElementById('spotify-player');
+        const token = playerElement.getAttribute('data');
+        // Erase after
+        console.log("Token :", token)
+    },
+    updated() {
+        console.log("Updated mount")
+        const playerElement = document.getElementById('spotify-player');
+        const token = playerElement.getAttribute('data');
+        // Erase after
+        console.log("Token :", token)
+        this.handlePlayerReady();
+    },
+    handlePlayerReady() {
+      window.onSpotifyWebPlaybackSDKReady = () => {
+        const playerElement = document.getElementById('spotify-player');
+        const token = playerElement.getAttribute('data');
+        console.log("Inside handlePlayerReady()")
+        console.log(token)
+        const player = new Spotify.Player({
+          name: 'Web Playback SDK Quick Start Player',
+          getOAuthToken: cb => { cb(token); },
+          volume: 0.5
+        });
+  
+        player.addListener('ready', ({ device_id }) => {
+          console.log('Ready with Device ID', device_id);
+          // this.pushEvent("set-device-id", {device_id: device_id});
+        });
+  
+        player.connect();
+      }
+    }
+  };
+
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}})
+let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}, hooks: Hooks})
 
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})

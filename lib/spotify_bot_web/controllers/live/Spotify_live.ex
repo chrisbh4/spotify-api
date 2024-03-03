@@ -329,6 +329,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
     assign(socket, timer_ref: timer_ref)
   end
 
+
   def fetch_token(socket) do
     url = "https://accounts.spotify.com/api/token"
     body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:4000"
@@ -353,6 +354,31 @@ defmodule SpotifyBotWeb.SpotifyLive do
         {:noreply, socket}
       end
   end
+
+  def refresh_token(socket) do
+    url = "https://accounts.spotify.com/api/token"
+    body = "grant_type=refresh_token&refresh_token=#{socket.assigns.refresh_token}"
+    headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
+
+    res = HTTPoison.post(url, body, headers)
+    case res do
+      {:ok , %{status_code: 200, body: body}} ->
+        Logger.info("Token Refreshed ✅")
+        json_data = Jason.decode!(body)
+        play_song_on_a_loop(socket)
+        {:noreply, assign(socket, access_token: json_data["access_token"], expires_in: json_data["expires_in"])}
+
+      {:ok, %{status_code: status_code, body: body}} ->
+        Logger.info(status_code: status_code)
+        Logger.info(body: body)
+        {:noreply, socket}
+
+      {:error, error} ->
+        Logger.info(error)
+        {:noreply, socket}
+      end
+  end
+
 
   def play_song(socket) do
     # url = "https://api.spotify.com/v1/me/player/play?device_id=9f178b17255f6334556f45148bc1fa3a564ee14e"
@@ -389,30 +415,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
         Logger.info(error)
         {:noreply, socket}
     end
-  end
-
-  def refresh_token(socket) do
-    url = "https://accounts.spotify.com/api/token"
-    body = "grant_type=refresh_token&refresh_token=#{socket.assigns.refresh_token}"
-    headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
-
-    res = HTTPoison.post(url, body, headers)
-    case res do
-      {:ok , %{status_code: 200, body: body}} ->
-        Logger.info("Token Refreshed ✅")
-        json_data = Jason.decode!(body)
-        play_song_on_a_loop(socket)
-        {:noreply, assign(socket, access_token: json_data["access_token"], expires_in: json_data["expires_in"])}
-
-      {:ok, %{status_code: status_code, body: body}} ->
-        Logger.info(status_code: status_code)
-        Logger.info(body: body)
-        {:noreply, socket}
-
-      {:error, error} ->
-        Logger.info(error)
-        {:noreply, socket}
-      end
   end
 
   @charset "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"

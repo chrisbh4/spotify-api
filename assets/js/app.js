@@ -31,22 +31,14 @@ let Hooks = {}
 Hooks.SpotifyPlayer = {
     mounted() {
         console.log("mounted()")
-        // Erase after
-        const playerElement = document.getElementById('spotify-player');
-        const token = playerElement.getAttribute('data');
-        console.log("Token :", token)
     },
     updated() {
-        console.log("Updated mount")
-        const playerElement = document.getElementById('spotify-player');
-        const token = playerElement.getAttribute('data');
-        // Erase after
+        console.log("Updated()")
         this.initializePlayer();
     },
     initializePlayer() {
       const playerElement = document.getElementById('spotify-player');
       const token = playerElement.getAttribute('data');
-      console.log("Initializing Player with token:", token);
       const player = new Spotify.Player({
         name: 'Web Playback SDK Quick Start Player',
         getOAuthToken: cb => { cb(token); },

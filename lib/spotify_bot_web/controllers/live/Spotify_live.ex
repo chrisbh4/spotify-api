@@ -13,7 +13,8 @@ defmodule SpotifyBotWeb.SpotifyLive do
       <button phx-click="start-timer">Start Timer </button>
       <button phx-click="kill-timer">Stop Timer </button>
       <%!-- <button phx-click="fetch-token">Generate Token </button> --%>
-      <button phx-click="get-devices">Get Device </button>
+      <%!-- <button phx-click="get-devices">Get Device </button> --%>
+      <button phx-click="play-music">Play song </button>
       </div>
 
       <h1>Spotify Web Playback SDK Quick Start</h1>
@@ -72,8 +73,8 @@ defmodule SpotifyBotWeb.SpotifyLive do
   # Authorization Code Flow: Single Grant token only this is why it is refreshing everytime
   def handle_event("auth-flow", _params, socket) do
     url = "https://accounts.spotify.com/authorize?"
-    redirect_uri = "http://localhost:4000"
-    # redirect_uri = "https://spotify-api.fly.dev"
+    # redirect_uri = "http://localhost:4000"
+    redirect_uri = "https://spotify-api.fly.dev"
     scope = "user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state streaming user-read-currently-playing"
     state = for _ <- 1..16, into: "", do: <<Enum.random('0123456789abcdef')>>
 
@@ -201,7 +202,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
   def handle_event("play-music", _params, socket) do
     # Macbook App
-    url = "https://api.spotify.com/v1/me/player/play?device_id=9f178b17255f6334556f45148bc1fa3a564ee14e"
+    url = "https://api.spotify.com/v1/me/player/play?device_id=#{socket.assigns.device_id}"
     # Chrome Web Player
     # url = "https://api.spotify.com/v1/me/player/play?device_id=438a73099346ce1736084c4ba4bc7f01e00a940f"
     headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}, {"Content-Type", "application/json"}]
@@ -336,8 +337,8 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
   def fetch_token(socket) do
     url = "https://accounts.spotify.com/api/token"
-    body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:4000"
-    # body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=https://spotify-api.fly.dev"
+    # body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:4000"
+    body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=https://spotify-api.fly.dev"
     headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
 
     res = HTTPoison.post(url, body, headers)

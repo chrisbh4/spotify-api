@@ -55,8 +55,8 @@ Hooks.SpotifyPlayer = {
 
       player.addListener('ready', ({ device_id }) => {
         console.log('Ready with Device ID: ', device_id);
-        // liveSocket.getSocket().pushEvent('set-device-id', {device_id: device_id});
-    });
+        this.pushEvent("set-device-id", {device_id: device_id})
+      });
 
       // Add all your player event listeners here
       document.getElementById('togglePlay').onclick = function() {
@@ -70,55 +70,7 @@ Hooks.SpotifyPlayer = {
       };
 
       player.connect();
-  },
-    // handlePlayerReady() {
-    //   window.onSpotifyWebPlaybackSDKReady = () => {
-    //     const playerElement = document.getElementById('spotify-player');
-    //     const token = playerElement.getAttribute('data');
-    //     console.log("Inside handlePlayerReady()")
-    //     console.log(token)
-    //     const player = new Spotify.Player({
-    //       name: 'Web Playback SDK Quick Start Player',
-    //       getOAuthToken: cb => { cb(token); },
-    //       volume: 0.5
-    //     });
-  
-    //   //* Ready
-    //   player.addListener('ready', ({ device_id }) => {
-    //       console.log('Ready with Device ID', device_id);
-    //       liveSocket.getSocket().pushEvent('set-device-id', {device_id: device_id});
-    //   });
-
-    //   //* Not Ready
-    //     // player.addListener('not_ready', ({ device_id }) => {
-    //     //     console.log('Device ID has gone offline', device_id);
-    //     // });
-
-    //     // player.addListener('initialization_error', ({ message }) => {
-    //     //     console.error(message);
-    //     // });
-
-    //     // player.addListener('authentication_error', ({ message }) => {
-    //     //     console.error(message);
-    //     // });
-
-    //     // player.addListener('account_error', ({ message }) => {
-    //     //     console.error(message);
-    //     // });
-
-    //     // document.getElementById('togglePlay').onclick = function() {
-    //     //   console.log("Toggle Play")
-    //     //   player.togglePlay();
-    //     // };
-    //     // document.getElementById('playSDK').onclick = function() {
-    //     //   player.togglePlay().then(() => {
-    //     //     console.log('Toggled playback!');
-    //     //   });
-    //     // };
-  
-    //     player.connect();
-    //   }
-    // }
+    },
   };
 
 
@@ -148,15 +100,15 @@ Hooks.SpotifyPlayer = {
     //     console.error(message);
     // });
 
-    document.getElementById('togglePlay').onclick = function() {
-      console.log("Toggle Play")
-      player.togglePlay();
-    };
-    document.getElementById('playSDK').onclick = function() {
-      player.togglePlay().then(() => {
-        console.log('Toggled playback!');
-      });
-    };
+    // document.getElementById('togglePlay').onclick = function() {
+    //   console.log("Toggle Play")
+    //   player.togglePlay();
+    // };
+    // document.getElementById('playSDK').onclick = function() {
+    //   player.togglePlay().then(() => {
+    //     console.log('Toggled playback!');
+    //   });
+    // };
 };
 
 

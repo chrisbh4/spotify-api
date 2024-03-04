@@ -52,9 +52,11 @@ defmodule SpotifyBotWeb.SpotifyLive do
     {:noreply, socket}
   end
 
-  def handle_event("set-device-id", params, socket) do
-    IO.inspect(params, label: "Device ID")
-    {:noreply, socket}
+  def handle_event("set-device-id", %{"device_id" => device_id}, socket) do
+    IO.inspect(device_id, label: "Device ID")
+
+
+    {:noreply, assign(socket, :device_id, device_id)}
   end
 
   def handle_event("start-timer", _params, socket) do

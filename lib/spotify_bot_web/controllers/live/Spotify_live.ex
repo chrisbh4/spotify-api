@@ -9,24 +9,22 @@ defmodule SpotifyBotWeb.SpotifyLive do
       <div class='flex justify-center w-full bg-red-500 '>
       <h1>Spotify API access point </h1>
       <button phx-click="auth-flow">Authentication Flow </button>
+      <%!-- <button phx-click="fetch-token">Fetch token </button> --%>
       <button phx-click="start-timer">Start Timer </button>
       <button phx-click="kill-timer">Stop Timer </button>
-    <%!--
-      <button phx-click="fetch-token">Generate Token </button>
-      <button phx-click="play-music">Play Music </button>
-      <button phx-click="pkce-auth">PKCE Auth Flow </button>
-      <button phx-click="refresh-token">Refresh Token </button>
-      <button phx-click="get-devices">Get Device </button>
-    --%>
-    <%!--
-      <button phx-click="fetch-artist">Artist data </button>
-      <button phx-click="fetch-top-tracks">Top Tracks </button>
-      <button phx-click="fetch-playlist"> Demo Playlist</button>
-      <button phx-click="get-currently-playing">Currently Playing </button>
-      <button phx-click="fetch-queue">Fetch Queue </button>
-      <button phx-click="play-song">Play music </button>
-    --%>
+      <%!-- <button phx-click="fetch-token">Generate Token </button> --%>
+      <%!-- <button phx-click="get-devices">Get Device </button> --%>
+      <button phx-click="play-music">Play song </button>
       </div>
+
+      <h1>Spotify Web Playback SDK Quick Start</h1>
+      <script src="https://sdk.scdn.co/spotify-player.js"></script>
+      <div id="spotify-player" data={@access_token} phx-hook="SpotifyPlayer">
+        <script id="sdk-script"></script>
+        <button id="togglePlay">Toggle Play</button>
+        <button id="playSDK">Play</button>
+      </div>
+
     """
   end
 
@@ -34,18 +32,32 @@ defmodule SpotifyBotWeb.SpotifyLive do
     {:ok, socket}
   end
 
-  def handle_params(params, _uri, socket) do
+ def handle_params(params, _uri, socket) do
     case params["code"] do
       nil ->
-        # Logger.info("Auth :code is nil ❌")
-        socket = assign(socket, code: nil, state: nil)
+        Logger.info(":code is nil ❌")
+        socket = assign(socket, code: nil, state: nil, access_token: nil)
         {:noreply, socket}
 
       _ ->
-        Logger.info("Auth :code in socket ✅")
-        socket = assign(socket, code: params["code"], state: params["state"])
+        Logger.info(":code in socket ✅")
+        socket = assign(socket, code: params["code"], state: params["state"], access_token: nil)
+        GenServer.cast(self(), :fetch_token)
+
         {:noreply, socket}
     end
+  end
+
+  def handle_cast(:fetch_token, socket) do
+    {_, socket} = fetch_token(socket)
+    {:noreply, socket}
+  end
+
+  def handle_event("set-device-id", %{"device_id" => device_id}, socket) do
+    IO.inspect(device_id, label: "Device ID")
+
+
+    {:noreply, assign(socket, :device_id, device_id)}
   end
 
   def handle_event("start-timer", _params, socket) do
@@ -78,10 +90,10 @@ defmodule SpotifyBotWeb.SpotifyLive do
     res = HTTPoison.get("#{url}#{query_params}")
 
     case res do
-      {:ok , %{status_code: 200, body: body}} ->
+      {:ok , %{status_code: 200, body: _body}} ->
         Logger.info("Auth successful ✅")
-        json_data = Jason.decode!(body)
-        IO.inspect(json_data)
+        # json_data = Jason.decode!(body)
+        # IO.inspect(json_data)
         {:noreply, socket}
 
       {:ok, %{status_code: status_code, body: _body, request_url: request_url}} ->
@@ -94,30 +106,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
       end
   end
 
-  # Authorization Code Flow fetch token // Single Grant token only this is why it is refreshing everytime
-  def handle_event("fetch-token", _params, socket) do
-    url = "https://accounts.spotify.com/api/token"
-    # body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:4000"
-    body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=https://spotify-api.fly.dev"
-    headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
-
-    res = HTTPoison.post(url, body, headers)
-    case res do
-      {:ok , %{status_code: 200, body: body}} ->
-        Logger.info("Auth Token with Code fetched ✅")
-        json_data = Jason.decode!(body)
-        {:noreply, assign(socket, access_token: json_data["access_token"], expires_in: json_data["expires_in"], refresh_token: json_data["refresh_token"])}
-
-      {:ok, %{status_code: status_code, body: body}} ->
-        Logger.info(status_code: status_code)
-        Logger.info(body: body)
-        {:noreply, socket}
-
-      {:error, error} ->
-        Logger.info(error)
-        {:noreply, socket}
-      end
-  end
 
   def handle_event("refresh-token", _params, socket) do
     url = "https://accounts.spotify.com/api/token"
@@ -214,7 +202,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
   def handle_event("play-music", _params, socket) do
     # Macbook App
-    url = "https://api.spotify.com/v1/me/player/play?device_id=9f178b17255f6334556f45148bc1fa3a564ee14e"
+    url = "https://api.spotify.com/v1/me/player/play?device_id=#{socket.assigns.device_id}"
     # Chrome Web Player
     # url = "https://api.spotify.com/v1/me/player/play?device_id=438a73099346ce1736084c4ba4bc7f01e00a940f"
     headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}, {"Content-Type", "application/json"}]
@@ -346,6 +334,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
     assign(socket, timer_ref: timer_ref)
   end
 
+
   def fetch_token(socket) do
     url = "https://accounts.spotify.com/api/token"
     # body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:4000"
@@ -355,9 +344,34 @@ defmodule SpotifyBotWeb.SpotifyLive do
     res = HTTPoison.post(url, body, headers)
     case res do
       {:ok , %{status_code: 200, body: body}} ->
-        Logger.info("Auth Token with Code fetched ✅")
+        Logger.info("Access Token ✅")
         json_data = Jason.decode!(body)
         {:noreply, assign(socket, access_token: json_data["access_token"], expires_in: json_data["expires_in"], refresh_token: json_data["refresh_token"])}
+
+      {:ok, %{status_code: status_code, body: body}} ->
+        Logger.info(status_code: status_code)
+        Logger.info("❌Bad Fetch token❌")
+        Logger.info(body: body)
+        {:noreply, socket}
+
+      {:error, error} ->
+        Logger.info(error)
+        {:noreply, socket}
+      end
+  end
+
+  def refresh_token(socket) do
+    url = "https://accounts.spotify.com/api/token"
+    body = "grant_type=refresh_token&refresh_token=#{socket.assigns.refresh_token}"
+    headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
+
+    res = HTTPoison.post(url, body, headers)
+    case res do
+      {:ok , %{status_code: 200, body: body}} ->
+        Logger.info("Token Refreshed ✅")
+        json_data = Jason.decode!(body)
+        play_song_on_a_loop(socket)
+        {:noreply, assign(socket, access_token: json_data["access_token"], expires_in: json_data["expires_in"])}
 
       {:ok, %{status_code: status_code, body: body}} ->
         Logger.info(status_code: status_code)
@@ -370,8 +384,10 @@ defmodule SpotifyBotWeb.SpotifyLive do
       end
   end
 
+
   def play_song(socket) do
-    url = "https://api.spotify.com/v1/me/player/play?device_id=9f178b17255f6334556f45148bc1fa3a564ee14e"
+    # url = "https://api.spotify.com/v1/me/player/play?device_id=9f178b17255f6334556f45148bc1fa3a564ee14e"
+    url = "https://api.spotify.com/v1/me/player/play?device_id=1fd2ffa7fe4e4c0cf85f71d7eb763ae52d7a6ada"
     headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}, {"Content-Type", "application/json"}]
     body = '{
       "context_uri": "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
@@ -406,30 +422,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
     end
   end
 
-  def refresh_token(socket) do
-    url = "https://accounts.spotify.com/api/token"
-    body = "grant_type=refresh_token&refresh_token=#{socket.assigns.refresh_token}"
-    headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
-
-    res = HTTPoison.post(url, body, headers)
-    case res do
-      {:ok , %{status_code: 200, body: body}} ->
-        Logger.info("Token Refreshed ✅")
-        json_data = Jason.decode!(body)
-        play_song_on_a_loop(socket)
-        {:noreply, assign(socket, access_token: json_data["access_token"], expires_in: json_data["expires_in"])}
-
-      {:ok, %{status_code: status_code, body: body}} ->
-        Logger.info(status_code: status_code)
-        Logger.info(body: body)
-        {:noreply, socket}
-
-      {:error, error} ->
-        Logger.info(error)
-        {:noreply, socket}
-      end
-  end
-
   @charset "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
   def generate_random_string(length) do
     length
@@ -448,5 +440,31 @@ defmodule SpotifyBotWeb.SpotifyLive do
     |> Base.url_encode64()
     |> String.trim_trailing("=")
   end
+
+
+   # Authorization Code Flow fetch token // Single Grant token only this is why it is refreshing everytime
+  #  def handle_event("fetch-token", _params, socket) do
+  #   url = "https://accounts.spotify.com/api/token"
+  #   # body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:4000"
+  #   body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=https://spotify-api.fly.dev"
+  #   headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
+
+  #   res = HTTPoison.post(url, body, headers)
+  #   case res do
+  #     {:ok , %{status_code: 200, body: body}} ->
+  #       Logger.info("Auth Token with Code fetched ✅")
+  #       json_data = Jason.decode!(body)
+  #       {:noreply, assign(socket, access_token: json_data["access_token"], expires_in: json_data["expires_in"], refresh_token: json_data["refresh_token"])}
+
+  #     {:ok, %{status_code: status_code, body: body}} ->
+  #       Logger.info(status_code: status_code)
+  #       Logger.info(body: body)
+  #       {:noreply, socket}
+
+  #     {:error, error} ->
+  #       Logger.info(error)
+  #       {:noreply, socket}
+  #     end
+  # end
 
 end

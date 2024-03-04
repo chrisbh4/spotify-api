@@ -30,10 +30,10 @@ let Hooks = {}
 
 Hooks.SpotifyPlayer = {
     mounted() {
-        console.log("Inside mount")
+        console.log("mounted()")
+        // Erase after
         const playerElement = document.getElementById('spotify-player');
         const token = playerElement.getAttribute('data');
-        // Erase after
         console.log("Token :", token)
     },
     updated() {
@@ -41,30 +41,123 @@ Hooks.SpotifyPlayer = {
         const playerElement = document.getElementById('spotify-player');
         const token = playerElement.getAttribute('data');
         // Erase after
-        console.log("Token :", token)
-        this.handlePlayerReady();
+        this.initializePlayer();
     },
-    handlePlayerReady() {
-      window.onSpotifyWebPlaybackSDKReady = () => {
-        const playerElement = document.getElementById('spotify-player');
-        const token = playerElement.getAttribute('data');
-        console.log("Inside handlePlayerReady()")
-        console.log(token)
-        const player = new Spotify.Player({
-          name: 'Web Playback SDK Quick Start Player',
-          getOAuthToken: cb => { cb(token); },
-          volume: 0.5
+    initializePlayer() {
+      const playerElement = document.getElementById('spotify-player');
+      const token = playerElement.getAttribute('data');
+      console.log("Initializing Player with token:", token);
+      const player = new Spotify.Player({
+        name: 'Web Playback SDK Quick Start Player',
+        getOAuthToken: cb => { cb(token); },
+        volume: 0.5
+      });
+
+      player.addListener('ready', ({ device_id }) => {
+        console.log('Ready with Device ID: ', device_id);
+        // liveSocket.getSocket().pushEvent('set-device-id', {device_id: device_id});
+    });
+
+      // Add all your player event listeners here
+      document.getElementById('togglePlay').onclick = function() {
+        console.log("Toggle Play")
+        player.togglePlay();
+      };
+      document.getElementById('playSDK').onclick = function() {
+        player.togglePlay().then(() => {
+          console.log('Toggled playback!');
         });
+      };
+
+      player.connect();
+  },
+    // handlePlayerReady() {
+    //   window.onSpotifyWebPlaybackSDKReady = () => {
+    //     const playerElement = document.getElementById('spotify-player');
+    //     const token = playerElement.getAttribute('data');
+    //     console.log("Inside handlePlayerReady()")
+    //     console.log(token)
+    //     const player = new Spotify.Player({
+    //       name: 'Web Playback SDK Quick Start Player',
+    //       getOAuthToken: cb => { cb(token); },
+    //       volume: 0.5
+    //     });
   
-        player.addListener('ready', ({ device_id }) => {
-          console.log('Ready with Device ID', device_id);
-          // this.pushEvent("set-device-id", {device_id: device_id});
-        });
+    //   //* Ready
+    //   player.addListener('ready', ({ device_id }) => {
+    //       console.log('Ready with Device ID', device_id);
+    //       liveSocket.getSocket().pushEvent('set-device-id', {device_id: device_id});
+    //   });
+
+    //   //* Not Ready
+    //     // player.addListener('not_ready', ({ device_id }) => {
+    //     //     console.log('Device ID has gone offline', device_id);
+    //     // });
+
+    //     // player.addListener('initialization_error', ({ message }) => {
+    //     //     console.error(message);
+    //     // });
+
+    //     // player.addListener('authentication_error', ({ message }) => {
+    //     //     console.error(message);
+    //     // });
+
+    //     // player.addListener('account_error', ({ message }) => {
+    //     //     console.error(message);
+    //     // });
+
+    //     // document.getElementById('togglePlay').onclick = function() {
+    //     //   console.log("Toggle Play")
+    //     //   player.togglePlay();
+    //     // };
+    //     // document.getElementById('playSDK').onclick = function() {
+    //     //   player.togglePlay().then(() => {
+    //     //     console.log('Toggled playback!');
+    //     //   });
+    //     // };
   
-        player.connect();
-      }
-    }
+    //     player.connect();
+    //   }
+    // }
   };
+
+
+  window.onSpotifyWebPlaybackSDKReady = () => {
+    // Actions to take once the SDK is ready, if any.
+
+    //   //* Ready
+    //   player.addListener('ready', ({ device_id }) => {
+    //     console.log('Ready with Device ID', device_id);
+    //     liveSocket.getSocket().pushEvent('set-device-id', {device_id: device_id});
+    // });
+
+    // //* Not Ready
+    // player.addListener('not_ready', ({ device_id }) => {
+    //     console.log('Device ID has gone offline', device_id);
+    // });
+
+    // player.addListener('initialization_error', ({ message }) => {
+    //     console.error(message);
+    // });
+
+    // player.addListener('authentication_error', ({ message }) => {
+    //     console.error(message);
+    // });
+
+    // player.addListener('account_error', ({ message }) => {
+    //     console.error(message);
+    // });
+
+    document.getElementById('togglePlay').onclick = function() {
+      console.log("Toggle Play")
+      player.togglePlay();
+    };
+    document.getElementById('playSDK').onclick = function() {
+      player.togglePlay().then(() => {
+        console.log('Toggled playback!');
+      });
+    };
+};
 
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")

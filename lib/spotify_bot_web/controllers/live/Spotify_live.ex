@@ -17,9 +17,12 @@ defmodule SpotifyBotWeb.SpotifyLive do
       </div>
 
       <h1>Spotify Web Playback SDK Quick Start</h1>
-    <button id="togglePlay">Toggle Play</button>
-    <button id="playSDK">Play</button>
-    <div id="spotify-player" data={@access_token} phx-hook="SpotifyPlayer"></div>
+      <script src="https://sdk.scdn.co/spotify-player.js"></script>
+      <div id="spotify-player" data={@access_token} phx-hook="SpotifyPlayer">
+        <script id="sdk-script"></script>
+        <button id="togglePlay">Toggle Play</button>
+        <button id="playSDK">Play</button>
+      </div>
 
     """
   end
@@ -45,7 +48,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
   end
 
   def handle_cast(:fetch_token, socket) do
-    IO.inspect("casst")
     {_, socket} = fetch_token(socket)
     {:noreply, socket}
   end

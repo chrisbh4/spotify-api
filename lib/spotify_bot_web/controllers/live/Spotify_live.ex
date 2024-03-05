@@ -298,14 +298,20 @@ defmodule SpotifyBotWeb.SpotifyLive do
     end
   end
 
+  # def handle_info({:timeout, _data, :fetch_token}, socket) do
+  #   token = fetch_token(socket)
+  #   case token do
+  #     {:noreply, socket} ->
+  #       Logger.info("Token & Timer ✅")
+  #       play_song_on_a_loop(socket)
+  #       {:noreply, socket}
+  #   end
+  # end
+
   def handle_info({:timeout, _data, :fetch_token}, socket) do
-    token = fetch_token(socket)
-    case token do
-      {:noreply, socket} ->
         Logger.info("Token & Timer ✅")
         play_song_on_a_loop(socket)
         {:noreply, socket}
-    end
   end
 
   def handle_info({:timeout, _data, :loop_song}, socket) do
@@ -401,6 +407,11 @@ defmodule SpotifyBotWeb.SpotifyLive do
     case res do
       {:ok , %{status_code: 204}} ->
         Logger.info("Playback started ✅")
+        socket = play_song_on_a_loop(socket)
+        {:noreply, socket}
+
+        {:ok , %{status_code: 202}} ->
+        Logger.info("Process not full completed 🟠")
         socket = play_song_on_a_loop(socket)
         {:noreply, socket}
 

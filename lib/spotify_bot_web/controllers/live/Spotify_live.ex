@@ -9,11 +9,8 @@ defmodule SpotifyBotWeb.SpotifyLive do
       <div class='flex justify-center w-full bg-red-500 '>
       <h1>Spotify API access point </h1>
       <button phx-click="auth-flow">Authentication Flow </button>
-      <%!-- <button phx-click="fetch-token">Fetch token </button> --%>
       <button phx-click="start-timer">Start Timer </button>
       <button phx-click="kill-timer">Stop Timer </button>
-      <%!-- <button phx-click="fetch-token">Generate Token </button> --%>
-      <%!-- <button phx-click="get-devices">Get Device </button> --%>
       <button phx-click="play-music">Play song </button>
       </div>
 
@@ -55,8 +52,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
   def handle_event("set-device-id", %{"device_id" => device_id}, socket) do
     IO.inspect(device_id, label: "Device ID")
-
-
     {:noreply, assign(socket, :device_id, device_id)}
   end
 
@@ -105,7 +100,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
         {:noreply, socket}
       end
   end
-
 
   def handle_event("refresh-token", _params, socket) do
     url = "https://accounts.spotify.com/api/token"
@@ -201,10 +195,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
   end
 
   def handle_event("play-music", _params, socket) do
-    # Macbook App
     url = "https://api.spotify.com/v1/me/player/play?device_id=#{socket.assigns.device_id}"
-    # Chrome Web Player
-    # url = "https://api.spotify.com/v1/me/player/play?device_id=438a73099346ce1736084c4ba4bc7f01e00a940f"
     headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}, {"Content-Type", "application/json"}]
     # offset: is the position of the song in the album in array format starting at 0
     body = '{
@@ -337,33 +328,9 @@ defmodule SpotifyBotWeb.SpotifyLive do
   end
 
   def play_song_on_a_loop(socket) do
-    timer_ref = :erlang.start_timer(3000, self(), :loop_song)
+    timer_ref = :erlang.start_timer(5000, self(), :loop_song)
+    # timer_ref = :erlang.start_timer(33000, self(), :loop_song)
     assign(socket, timer_ref: timer_ref)
-  end
-
-  def pause_song(socket) do
-    url = "https://api.spotify.com/v1/me/player/pause"
-    headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}]
-    res = HTTPoison.put(url, "", headers)
-    case res do
-      {:ok , %{status_code: 204}} ->
-        Logger.info("Paused process ✅")
-        {:noreply, socket}
-
-        {:ok , %{status_code: 202}} ->
-        Logger.info("Paused process with Issues 🟠⏸️")
-        {:noreply, socket}
-
-      {:ok, %{status_code: status_code, body: body}} ->
-        Logger.info("Paused failed ❌")
-        Logger.info(status_code: status_code)
-        IO.inspect(body)
-        {:noreply, socket}
-
-      {:error, error} ->
-        Logger.info(error)
-        {:noreply, socket}
-    end
   end
 
 
@@ -449,6 +416,31 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
       {:ok, %{status_code: status_code, body: body}} ->
         Logger.info("Playback failed ❌")
+        Logger.info(status_code: status_code)
+        IO.inspect(body)
+        {:noreply, socket}
+
+      {:error, error} ->
+        Logger.info(error)
+        {:noreply, socket}
+    end
+  end
+
+  def pause_song(socket) do
+    url = "https://api.spotify.com/v1/me/player/pause"
+    headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}]
+    res = HTTPoison.put(url, "", headers)
+    case res do
+      {:ok , %{status_code: 204}} ->
+        Logger.info("Paused process ✅")
+        {:noreply, socket}
+
+        {:ok , %{status_code: 202}} ->
+        Logger.info("Paused process with Issues ⏸️")
+        {:noreply, socket}
+
+      {:ok, %{status_code: status_code, body: body}} ->
+        Logger.info("Paused failed ❌")
         Logger.info(status_code: status_code)
         IO.inspect(body)
         {:noreply, socket}

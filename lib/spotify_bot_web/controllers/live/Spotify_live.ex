@@ -332,12 +332,38 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
   def kill_timer_loop(socket) do
     :erlang.cancel_timer(socket.assigns.timer_ref)
+    pause_song(socket)
     Logger.info("Timer stopped")
   end
 
   def play_song_on_a_loop(socket) do
     timer_ref = :erlang.start_timer(3000, self(), :loop_song)
     assign(socket, timer_ref: timer_ref)
+  end
+
+  def pause_song(socket) do
+    url = "https://api.spotify.com/v1/me/player/pause"
+    headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}]
+    res = HTTPoison.put(url, "", headers)
+    case res do
+      {:ok , %{status_code: 204}} ->
+        Logger.info("Paused process ✅")
+        {:noreply, socket}
+
+        {:ok , %{status_code: 202}} ->
+        Logger.info("Paused process with Issues 🟠⏸️")
+        {:noreply, socket}
+
+      {:ok, %{status_code: status_code, body: body}} ->
+        Logger.info("Paused failed ❌")
+        Logger.info(status_code: status_code)
+        IO.inspect(body)
+        {:noreply, socket}
+
+      {:error, error} ->
+        Logger.info(error)
+        {:noreply, socket}
+    end
   end
 
 

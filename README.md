@@ -16,9 +16,10 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
   * Guides: https://hexdocs.pm/phoenix/overview.html
   * Docs: https://hexdocs.pm/phoenix
   * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+  
 # spotify-api
-
+  * API docs: https://developer.spotify.com/documentation/web-api/reference/pause-a-users-playback
+  * Status Codes: https://developer.spotify.com/documentation/web-api/concepts/api-calls
 
 # Fetches Web Token
 curl -X POST "https://accounts.spotify.com/api/token" \

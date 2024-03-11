@@ -328,8 +328,8 @@ defmodule SpotifyBotWeb.SpotifyLive do
   end
 
   def play_song_on_a_loop(socket) do
-    timer_ref = :erlang.start_timer(5000, self(), :loop_song)
-    # timer_ref = :erlang.start_timer(33000, self(), :loop_song)
+    # timer_ref = :erlang.start_timer(5000, self(), :loop_song)
+    timer_ref = :erlang.start_timer(33000, self(), :loop_song)
     assign(socket, timer_ref: timer_ref)
   end
 
@@ -369,7 +369,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
       {:ok , %{status_code: 200, body: body}} ->
         Logger.info("Token Refreshed ✅")
         json_data = Jason.decode!(body)
-        play_song_on_a_loop(socket)
         {:noreply, assign(socket, access_token: json_data["access_token"], expires_in: json_data["expires_in"])}
 
       {:ok, %{status_code: status_code, body: body}} ->
@@ -404,14 +403,15 @@ defmodule SpotifyBotWeb.SpotifyLive do
         {:noreply, socket}
 
         {:ok , %{status_code: 202}} ->
-        Logger.info("Process not full completed 🟠")
+        Logger.info("Play() not fully completed 🟠")
         socket = play_song_on_a_loop(socket)
         {:noreply, socket}
 
       {:ok, %{status_code: 401}} ->
         Logger.info("Expired Token ❌")
         Logger.info(status_code: 401)
-        refresh_token(socket)
+        {_, socket} = refresh_token(socket)
+        play_song_on_a_loop(socket)
         {:noreply, socket}
 
       {:ok, %{status_code: status_code, body: body}} ->

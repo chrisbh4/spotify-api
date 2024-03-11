@@ -29,3 +29,9 @@ curl -X POST "https://accounts.spotify.com/api/token" \
 # Fetches Willies spotify data artist/:id
  curl "https://api.spotify.com/v1/artists/3UR9ghLycQXaVDNJUNH3RY?si=aQ82WY_SS4OfwWYMAQBm_A" \
      -H "Authorization: Bearer  BQDtH-Ty-9hf8LtyWU5m0Hr93lp6vqM7i38YU6rTioqdgXwqMoPOYkQrxH0CIsFvET-xz-qG1wJQr8n7lymIxUEb9z2c0LFelkW_Yt1LANAW29MENqo"
+
+
+-----------
+
+How to use Async for a HTTP request: https://elixirforum.com/t/how-to-make-async-requests-using-httpoison/19349/9
+Elixir's Tasks (helper functions): https://hexdocs.pm/elixir/1.12/Task.html#async/1

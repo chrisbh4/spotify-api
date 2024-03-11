@@ -384,7 +384,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
 
   def play_song(socket) do
-    # url = "https://api.spotify.com/v1/me/player/play?device_id=9f178b17255f6334556f45148bc1fa3a564ee14e"
     url = "https://api.spotify.com/v1/me/player/play?device_id=#{socket.assigns.device_id}"
     headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}, {"Content-Type", "application/json"}]
     body = '{

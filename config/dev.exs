@@ -21,10 +21,10 @@ config :spotify_bot, SpotifyBotWeb.Endpoint,
   # http: [ip: {127, 0, 0, 1}, port: 4000],
   # _________________________________________________________
   # Comment back in for Production
-  http: [ip: {0, 0, 0, 0}, port: 8080],
+  # http: [ip: {0, 0, 0, 0}, port: 8080],
   # _________________________________________________________
   # Comment back in for Localhost
-  # http: [ip: {0, 0, 0, 0}, port: 4000],
+  http: [ip: {0, 0, 0, 0}, port: 4000],
   # _________________________________________________________
   check_origin: false,
   code_reloader: true,

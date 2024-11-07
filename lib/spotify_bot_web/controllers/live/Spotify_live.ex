@@ -71,7 +71,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
     redirect_uri = "http://localhost:4000"
     # redirect_uri = "https://spotify-api.fly.dev"
     scope = "user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state streaming user-read-currently-playing"
-    state = for _ <- 1..16, into: "", do: <<Enum.random('0123456789abcdef')>>
+    state = for _ <- 1..16, into: "", do: <<Enum.random(~c'0123456789abcdef')>>
 
     query_params = [
       response_type: "code",
@@ -198,13 +198,13 @@ defmodule SpotifyBotWeb.SpotifyLive do
     url = "https://api.spotify.com/v1/me/player/play?device_id=#{socket.assigns.device_id}"
     headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}, {"Content-Type", "application/json"}]
     # offset: is the position of the song in the album in array format starting at 0
-    body = '{
-      "context_uri": "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
-      "offset": {
-          "position": 4
+    body = "{
+      \"context_uri\": \"spotify:album:5ht7ItJgpBH7W6vJ5BqpPr\",
+      \"offset\": {
+          \"position\": 4
       },
-      "position_ms": 0
-    }'
+      \"position_ms\": 0
+    }"
 
     res = HTTPoison.put(url, body, headers)
     case res do
@@ -260,7 +260,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
         {:noreply, socket}
 
       {:ok, %{status_code: status_code, body: body}} ->
-        Logger.info('#{status_code}')
+        Logger.info("#{status_code}")
         IO.inspect(body)
         {:noreply, socket}
 
@@ -279,7 +279,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
         {:noreply, socket}
 
       {:ok, %{status_code: status_code, body: body}} ->
-        Logger.info('#{status_code}')
+        Logger.info("#{status_code}")
         IO.inspect(body)
         {:noreply, socket}
 
@@ -386,13 +386,13 @@ defmodule SpotifyBotWeb.SpotifyLive do
   def play_song(socket) do
     url = "https://api.spotify.com/v1/me/player/play?device_id=#{socket.assigns.device_id}"
     headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}, {"Content-Type", "application/json"}]
-    body = '{
-      "context_uri": "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
-      "offset": {
-          "position": 4
+    body = "{
+      \"context_uri\": \"spotify:album:5ht7ItJgpBH7W6vJ5BqpPr\",
+      \"offset\": {
+          \"position\": 4
       },
-      "position_ms": 0
-    }'
+      \"position_ms\": 0
+    }"
 
     res = HTTPoison.put(url, body, headers)
     case res do

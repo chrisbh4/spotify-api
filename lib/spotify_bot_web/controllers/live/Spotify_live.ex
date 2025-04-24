@@ -4,26 +4,79 @@ defmodule SpotifyBotWeb.SpotifyLive do
   use Phoenix.LiveView
   require Logger
 
-  def render(assigns) do
-    ~H"""
-      <div class='flex justify-center w-full bg-red-500 '>
-      <h1>Spotify API access point </h1>
-      <button phx-click="auth-flow">Authentication Flow </button>
-      <button phx-click="start-timer">Start Timer </button>
-      <button phx-click="kill-timer">Stop Timer </button>
-      <button phx-click="play-music">Play song </button>
+  # def render(assigns) do
+  #   ~H"""
+  #     <div class='flex justify-center w-full bg-red-500 '>
+  #     <h1>Spotify API access point </h1>
+  #     <button phx-click="auth-flow">Authentication Flow </button>
+  #     <button phx-click="start-timer">Start Timer </button>
+  #     <button phx-click="kill-timer">Stop Timer </button>
+  #     <button phx-click="play-music">Play song </button>
+  #     </div>
+
+  #     <h1>Spotify Web Playback SDK Quick Start</h1>
+  #     <script src="https://sdk.scdn.co/spotify-player.js"></script>
+  #     <div id="spotify-player" data={@access_token} phx-hook="SpotifyPlayer">
+  #       <script id="sdk-script"></script>
+  #       <button id="togglePlay">Toggle Play</button>
+  #       <button id="playSDK">Play</button>
+  #     </div>
+
+  #   """
+  # end
+
+def render(assigns) do
+  ~H"""
+    <head>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
+  </head>
+  <div class="bg-[#0F172A] text-white min-h-screen flex items-center justify-center text-4xl font-sans px-4">
+    <%!-- <div class="w-full max-w-3xl md:w-[80%] space-y-6 text-2xl" > --%>
+    <div class="w-full max-w-[25%] md:w-[80%] space-y-6 text-2xl" >
+
+      <!-- Header -->
+      <div class="text-center space-y-1">
+        <%!-- <h1 class="text-5xl md:text-6xl font-semibold flex items-center justify-center gap-3"> --%>
+        <h1 class="text-7xl font-semibold flex items-center justify-center gap-3">
+          <%!-- <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="h-10 md:h-12" alt="Spotify" /> --%>
+          <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="h-[5rem]" alt="Spotify" />
+          Spotify Stream Bot
+        </h1>
+        <p class="text-4xl md:text-2xl text-gray-400">Automate your Spotify streaming with ease</p>
       </div>
 
-      <h1>Spotify Web Playback SDK Quick Start</h1>
-      <script src="https://sdk.scdn.co/spotify-player.js"></script>
-      <div id="spotify-player" data={@access_token} phx-hook="SpotifyPlayer">
-        <script id="sdk-script"></script>
-        <button id="togglePlay">Toggle Play</button>
-        <button id="playSDK">Play</button>
+      <!-- URL Input -->
+      <div class="bg-[#1E293B] rounded-lg px-4 py-4 flex items-center gap-3">
+        <input type="text" placeholder="https://open.spotify.com/track/..." class="flex-1 bg-transparent text-4xl text-gray-200 placeholder-gray-500 focus:outline-none" />
+        <button class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">📋 Paste</button>
       </div>
 
-    """
-  end
+      <!-- Bot Controls -->
+      <div class="bg-[#1E293B] rounded-lg px-4 py-4 flex flex-col md:flex-row justify-between gap-3">
+        <button phx-click="auth-flow" class="bg-[#334155] px-6 py-3 rounded-lg text-5xl hover:bg-[#475569] transition w-full md:w-auto h-auto">🔑 Auth</button>
+        <button phx-click="start-timer" class="bg-[#22C55E] px-4 py-2 rounded-md text-5xl hover:bg-[#16A34A] transition w-full md:w-auto h-auto">▶ Start Bot</button>
+        <button phx-click="kill-timer" class="bg-[#EF4444] px-4 py-2 rounded-md text-5xl hover:bg-[#DC2626] transition w-full md:w-auto h-auto">⏹ Stop Bot</button>
+      </div>
+
+      <!-- Status Panel -->
+      <div class="bg-[#1E293B] rounded-lg px-4 py-4">
+        <div class="flex justify-between items-center mb-3">
+          <span class="font-medium text-2xl">Status</span>
+          <span class="text-xl bg-[#334155] px-2 py-1 rounded-full">Idle</span>
+        </div>
+        <div class="text-2xl text-gray-300 space-y-1">
+          <p><span class="text-gray-400">Current Track:</span> Not playing</p>
+          <p><span class="text-gray-400">Stream Count:</span> 0</p>
+          <p><span class="text-gray-400">Running Time:</span> 00:00:00</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  """
+end
+
+
 
   def mount(_params, _, socket) do
     {:ok, socket}

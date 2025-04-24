@@ -25,71 +25,121 @@ defmodule SpotifyBotWeb.SpotifyLive do
   #   """
   # end
 
+# def render(assigns) do
+#   ~H"""
+#     <head>
+#     <script src="https://cdn.tailwindcss.com"></script>
+#     <script src="https://sdk.scdn.co/spotify-player.js"></script>
+#   </head>
+#   <div class="bg-[#0F172A] text-white min-h-screen flex items-center justify-center text-4xl font-sans px-4">
+#     <%!-- <div class="w-full max-w-3xl md:w-[80%] space-y-6 text-2xl" > --%>
+#     <div class="w-full max-w-[25%] md:w-[80%] space-y-6 text-2xl mb-[30rem]" >
+
+#       <!-- Header -->
+#       <div class="text-center space-y-1">
+#         <%!-- <h1 class="text-5xl md:text-6xl font-semibold flex items-center justify-center gap-3"> --%>
+#         <h1 class="text-7xl font-semibold flex items-center justify-center gap-3">
+#           <%!-- <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="h-10 md:h-12" alt="Spotify" /> --%>
+#           <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="h-[5rem]" alt="Spotify" />
+#           Spotify Stream Bot
+#         </h1>
+#         <p class="text-4xl md:text-2xl text-gray-400">Automate your Spotify streaming with ease</p>
+#       </div>
+
+#       <!-- URL Input -->
+#       <div class="bg-[#1E293B] rounded-lg px-4 py-4 flex items-center gap-3">
+#         <input id="song-url" type="text" placeholder={@url} class="flex-1 bg-transparent text-4xl text-gray-200 placeholder-gray-500 focus:outline-none" />
+#         <button phx-click="load-song-url" phx-value-url={@url} class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">Load Song into the bot</button>
+#         <%!--
+#           1. After the Url has been pasted and the "addded" button has been clicked change the Paste logo to a check mark with a word URL added
+#           2. If the user wants to add a different URL display a small <span> tag that will remove the URL and change the Icon back to add with no green check mark
+#          --%>
+#         <%!-- <button class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">📋 Paste</button> --%>
+#         <%!-- <button class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">Load the URL into the bot</button> --%>
+#         <%!-- <button class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">Fetch Song to stream</button> --%>
+#       </div>
+
+#       <!-- Bot Controls -->
+#       <div class="bg-[#1E293B] rounded-lg px-6 py-4 flex flex-col md:flex-row justify-between gap-3">
+#         <button phx-click="auth-flow" class="bg-[#383737] px-[5.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105 outline-[#383737]">🔑 Auth</button>
+#         <button phx-click="start-timer" class="bg-[#383737] px-[5.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105">▶ Start Bot</button>
+#         <button phx-click="kill-timer" class="bg-[#383737] px-[5.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105">⏹ Stop Bot</button>
+
+#         <%!-- <button phx-click="auth-flow" class="bg-gradient-to-r from-blue-500 to-indigo-500 px-8 py-4 rounded-lg text-[2.8rem] font-semibold hover:from-blue-600 hover:to-indigo-600 transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105">🔑 Auth</button> --%>
+#         <%!-- <button phx-click="start-timer" class="bg-gradient-to-r from-green-400 to-green-600 px-8 py-4 rounded-lg text-[2.8rem] font-semibold hover:from-green-500 hover:to-green-700 transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105">▶ Start Bot</button> --%>
+#         <%!-- <button phx-click="kill-timer" class="bg-gradient-to-r from-red-400 to-red-600 px-8 py-4 rounded-lg text-[2.8rem] font-semibold hover:from-red-500 hover:to-red-700 transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105">⏹ Stop Bot</button> --%>
+#       </div>
+
+#       <!-- Status Panel -->
+#       <%!-- <div class="bg-[#1E293B] rounded-lg px-4 py-4"> --%>
+#       <div class="bg-[#1E293B] rounded-lg px-8 py-8">
+#         <div class="flex justify-between items-center mb-3">
+#           <span class="font-medium text-4xl">Status</span>
+#           <span class="text-3xl bg-[#334155] px-8 py-2 rounded-full">Idle</span>
+#         </div>
+#         <div class="text-3xl text-gray-300 space-y-1">
+#           <%!-- If Auth is 200 then display a green check mark else display a red x ❌ --%>
+#           <p><span class="text-gray-400">Auth:</span> ❌</p>
+#           <p><span class="text-gray-400">Current Track:</span> Not playing</p>
+#           <p><span class="text-gray-400">Stream Count:</span> <%= @stream_count %></p>
+#           <p><span class="text-gray-400">Running Time:</span> 00:00:00</p>
+#         </div>
+#       </div>
+#     </div>
+#   </div>
+#   """
+# end
+
+
 def render(assigns) do
   ~H"""
-    <head>
+  <head>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://sdk.scdn.co/spotify-player.js"></script>
   </head>
-  <div class="bg-[#0F172A] text-white min-h-screen flex items-center justify-center text-4xl font-sans px-4">
-    <%!-- <div class="w-full max-w-3xl md:w-[80%] space-y-6 text-2xl" > --%>
-    <div class="w-full max-w-[25%] md:w-[80%] space-y-6 text-2xl mb-[30rem]" >
+  <div class="bg-[#0F172A] text-white min-h-screen flex items-center justify-center font-sans px-4 py-10">
+    <div class="w-full max-w-5xl space-y-10">
 
       <!-- Header -->
-      <div class="text-center space-y-1">
-        <%!-- <h1 class="text-5xl md:text-6xl font-semibold flex items-center justify-center gap-3"> --%>
-        <h1 class="text-7xl font-semibold flex items-center justify-center gap-3">
-          <%!-- <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="h-10 md:h-12" alt="Spotify" /> --%>
-          <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="h-[5rem]" alt="Spotify" />
+      <div class="text-center space-y-2">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-semibold flex items-center justify-center gap-4">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="h-10 sm:h-12 lg:h-16" alt="Spotify" />
           Spotify Stream Bot
         </h1>
-        <p class="text-4xl md:text-2xl text-gray-400">Automate your Spotify streaming with ease</p>
+        <p class="text-lg sm:text-xl text-gray-400">Automate your Spotify streaming with ease</p>
       </div>
 
       <!-- URL Input -->
-      <div class="bg-[#1E293B] rounded-lg px-4 py-4 flex items-center gap-3">
-        <input id="song-url" type="text" placeholder={@url} class="flex-1 bg-transparent text-4xl text-gray-200 placeholder-gray-500 focus:outline-none" />
-        <button phx-click="load-song-url" phx-value-url={@url} class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">Load Song into the bot</button>
-        <%!--
-          1. After the Url has been pasted and the "addded" button has been clicked change the Paste logo to a check mark with a word URL added
-          2. If the user wants to add a different URL display a small <span> tag that will remove the URL and change the Icon back to add with no green check mark
-         --%>
-        <%!-- <button class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">📋 Paste</button> --%>
-        <%!-- <button class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">Load the URL into the bot</button> --%>
-        <%!-- <button class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">Fetch Song to stream</button> --%>
+      <div class="bg-[#1E293B] rounded-lg px-4 py-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <input id="song-url" type="text" placeholder={@url} class="flex-1 bg-transparent text-base sm:text-lg text-gray-200 placeholder-gray-500 focus:outline-none px-3 py-2 border border-gray-600 rounded-md" />
+        <button phx-click="load-song-url" phx-value-url={@url} class="bg-[#334155] text-sm sm:text-base px-4 py-2 rounded-md hover:bg-[#475569] transition whitespace-nowrap">Load Song</button>
       </div>
 
       <!-- Bot Controls -->
-      <div class="bg-[#1E293B] rounded-lg px-6 py-4 flex flex-col md:flex-row justify-between gap-3">
-        <button phx-click="auth-flow" class="bg-[#383737] px-[5.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105 outline-[#383737]">🔑 Auth</button>
-        <button phx-click="start-timer" class="bg-[#383737] px-[5.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105">▶ Start Bot</button>
-        <button phx-click="kill-timer" class="bg-[#383737] px-[5.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105">⏹ Stop Bot</button>
-
-        <%!-- <button phx-click="auth-flow" class="bg-gradient-to-r from-blue-500 to-indigo-500 px-8 py-4 rounded-lg text-[2.8rem] font-semibold hover:from-blue-600 hover:to-indigo-600 transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105">🔑 Auth</button> --%>
-        <%!-- <button phx-click="start-timer" class="bg-gradient-to-r from-green-400 to-green-600 px-8 py-4 rounded-lg text-[2.8rem] font-semibold hover:from-green-500 hover:to-green-700 transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105">▶ Start Bot</button> --%>
-        <%!-- <button phx-click="kill-timer" class="bg-gradient-to-r from-red-400 to-red-600 px-8 py-4 rounded-lg text-[2.8rem] font-semibold hover:from-red-500 hover:to-red-700 transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105">⏹ Stop Bot</button> --%>
+      <div class="bg-[#1E293B] rounded-lg px-6 py-6 flex flex-col sm:flex-row justify-between gap-4">
+        <button phx-click="auth-flow" class="bg-[#383737] px-6 py-3 rounded-md text-base sm:text-lg font-semibold hover:scale-105 transition w-full sm:w-auto">🔑 Auth</button>
+        <button phx-click="start-timer" class="bg-[#22C55E] px-6 py-3 rounded-md text-base sm:text-lg font-semibold hover:scale-105 transition w-full sm:w-auto">▶ Start Bot</button>
+        <button phx-click="kill-timer" class="bg-[#EF4444] px-6 py-3 rounded-md text-base sm:text-lg font-semibold hover:scale-105 transition w-full sm:w-auto">⏹ Stop Bot</button>
       </div>
 
       <!-- Status Panel -->
-      <%!-- <div class="bg-[#1E293B] rounded-lg px-4 py-4"> --%>
-      <div class="bg-[#1E293B] rounded-lg px-8 py-8">
-        <div class="flex justify-between items-center mb-3">
-          <span class="font-medium text-4xl">Status</span>
-          <span class="text-3xl bg-[#334155] px-8 py-2 rounded-full">Idle</span>
+      <div class="bg-[#1E293B] rounded-lg px-6 py-6 space-y-4">
+        <div class="flex justify-between items-center">
+          <span class="font-medium text-xl sm:text-2xl">Status</span>
+          <span class="text-sm sm:text-base bg-[#334155] px-4 py-1 rounded-full">Idle</span>
         </div>
-        <div class="text-3xl text-gray-300 space-y-1">
-          <%!-- If Auth is 200 then display a green check mark else display a red x ❌ --%>
+        <div class="text-sm sm:text-base text-gray-300 space-y-1">
           <p><span class="text-gray-400">Auth:</span> ❌</p>
           <p><span class="text-gray-400">Current Track:</span> Not playing</p>
           <p><span class="text-gray-400">Stream Count:</span> <%= @stream_count %></p>
           <p><span class="text-gray-400">Running Time:</span> 00:00:00</p>
         </div>
       </div>
+
     </div>
   </div>
   """
 end
-
 
 
   def mount(_params, _, socket) do

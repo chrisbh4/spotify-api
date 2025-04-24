@@ -132,7 +132,6 @@ end
   # Authorization Code Flow: Single Grant token only this is why it is refreshing everytime
   def handle_event("auth-flow", _params, socket) do
     url = "https://accounts.spotify.com/authorize?"
-    # redirect_uri = "http://localhost:4000"
     redirect_uri = "https://spotify-api.fly.dev"
     scope = "user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state streaming user-read-currently-playing"
     state = for _ <- 1..16, into: "", do: <<Enum.random('0123456789abcdef')>>
@@ -189,8 +188,7 @@ end
   end
 
   def handle_event("fetch-artist", _params, socket) do
-    # Willie
-    # url = "https://api.spotify.com/v1/artists/3UR9ghLycQXaVDNJUNH3RY?si=aQ82WY_SS4OfwWYMAQBm_A"
+    # Willie:  url = "https://api.spotify.com/v1/artists/3UR9ghLycQXaVDNJUNH3RY?si=aQ82WY_SS4OfwWYMAQBm_A"
     url = "https://api.spotify.com/v1/artists/3UR9ghLycQXaVDNJUNH3RY"
     res = HTTPoison.get(url, [{"Authorization:", "Bearer #{socket.assigns.access_token}"}] )
 
@@ -400,7 +398,6 @@ end
 
   def fetch_token(socket) do
     url = "https://accounts.spotify.com/api/token"
-    # body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:4000"
     body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=https://spotify-api.fly.dev"
     headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
 

@@ -53,7 +53,10 @@ def render(assigns) do
           1. After the Url has been pasted and the "addded" button has been clicked change the Paste logo to a check mark with a word URL added
           2. If the user wants to add a different URL display a small <span> tag that will remove the URL and change the Icon back to add with no green check mark
          --%>
-        <button class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">📋 Paste</button>
+        <%!-- <button class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">📋 Paste</button> --%>
+        <%!-- <button class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">Load the URL into the bot</button> --%>
+        <button class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">Load Song into the bot</button>
+        <%!-- <button class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">Fetch Song to stream</button> --%>
       </div>
 
       <!-- Bot Controls -->
@@ -78,7 +81,7 @@ def render(assigns) do
           <%!-- If Auth is 200 then display a green check mark else display a red x ❌ --%>
           <p><span class="text-gray-400">Auth:</span> ❌</p>
           <p><span class="text-gray-400">Current Track:</span> Not playing</p>
-          <p><span class="text-gray-400">Stream Count:</span> 0</p>
+          <p><span class="text-gray-400">Stream Count:</span> <%= @stream_count %></p>
           <p><span class="text-gray-400">Running Time:</span> 00:00:00</p>
         </div>
       </div>
@@ -97,12 +100,12 @@ end
     case params["code"] do
       nil ->
         Logger.info(":code is nil ❌")
-        socket = assign(socket, code: nil, state: nil, access_token: nil)
+        socket = assign(socket, code: nil, state: nil, access_token: nil, stream_count: 0)
         {:noreply, socket}
 
       _ ->
         Logger.info(":code in socket ✅")
-        socket = assign(socket, code: params["code"], state: params["state"], access_token: nil)
+        socket = assign(socket, code: params["code"], state: params["state"], access_token: nil, stream_count: 0)
         GenServer.cast(self(), :fetch_token)
 
         {:noreply, socket}
@@ -119,6 +122,7 @@ end
     {:noreply, assign(socket, :device_id, device_id)}
   end
 
+  # Disable The stream but test if the count stays after the loop happens again
   def handle_event("start-timer", _params, socket) do
     start_timer()
     {:noreply, socket}
@@ -129,10 +133,21 @@ end
     {:noreply, socket}
   end
 
+  def handle_event("start-bot", _params, socket) do
+    start_timer()
+    {:noreply, socket}
+  end
+
+  def handle_event("stop-bot", _params, socket) do
+    kill_timer_loop(socket)
+    {:noreply, socket}
+  end
+
   # Authorization Code Flow: Single Grant token only this is why it is refreshing everytime
   def handle_event("auth-flow", _params, socket) do
     url = "https://accounts.spotify.com/authorize?"
     redirect_uri = "https://spotify-api.fly.dev"
+    # redirect_uri = "http://localhost:8080"
     scope = "user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state streaming user-read-currently-playing"
     state = for _ <- 1..16, into: "", do: <<Enum.random('0123456789abcdef')>>
 
@@ -187,75 +202,6 @@ end
       end
   end
 
-  def handle_event("fetch-artist", _params, socket) do
-    # Willie:  url = "https://api.spotify.com/v1/artists/3UR9ghLycQXaVDNJUNH3RY?si=aQ82WY_SS4OfwWYMAQBm_A"
-    url = "https://api.spotify.com/v1/artists/3UR9ghLycQXaVDNJUNH3RY"
-    res = HTTPoison.get(url, [{"Authorization:", "Bearer #{socket.assigns.access_token}"}] )
-
-    case res do
-      {:ok , %{status_code: 200, body: body}} ->
-        Logger.info("200")
-        IO.inspect(Jason.decode!(body))
-        {:noreply, socket}
-
-        {:ok, %{status_code: status_code, body: body}} ->
-          Logger.info("Artist data cannot be fetched")
-          Logger.info(status_code: status_code)
-          Logger.info(body: body)
-          IO.inspect(Jason.decode!(body))
-        {:noreply, socket}
-
-      {:error , error} ->
-        Logger.info(error)
-        {:noreply, socket}
-    end
-  end
-
-  def handle_event("fetch-top-tracks", _params, socket) do
-    url = "https://api.spotify.com/v1/artists/3TVXtAsR1Inumwj472S9r4/top-tracks?country=US"
-    res = HTTPoison.get(url, [{"Authorization:", "Bearer #{socket.assigns.access_token}"}])
-
-    case res do
-      {:ok , %{status_code: 200, body: body}} ->
-        Logger.info("200")
-        IO.inspect(Jason.decode!(body))
-        {:noreply, socket}
-
-        {:ok, %{status_code: status_code, body: body}} ->
-          Logger.info("Artist data cannot be fetched")
-          Logger.info(status_code: status_code)
-          Logger.info(body: body)
-          IO.inspect(Jason.decode!(body))
-        {:noreply, socket}
-
-      {:error , error} ->
-        Logger.info(error)
-        {:noreply, socket}
-    end
-  end
-
-  def handle_event("fetch-playlist", _params, socket) do
-    url = "https://api.spotify.com/v1/playlists/30GBe73yDNLqPBi6fJlUAi"
-    res = HTTPoison.get(url, [{"Authorization:", "Bearer #{socket.assigns.access_token}"}] )
-
-    case res do
-      {:ok , %{status_code: 200, body: body}} ->
-        Logger.info("200")
-        IO.inspect(Jason.decode!(body))
-        {:noreply, socket}
-
-        {:ok, %{status_code: status_code, body: body}} ->
-          Logger.info("Playlist data: cannot be fetched")
-          Logger.info(status_code: status_code)
-          IO.inspect(Jason.decode!(body))
-        {:noreply, socket}
-
-      {:error , error} ->
-        Logger.info(error)
-        {:noreply, socket}
-    end
-  end
-
   def handle_event("play-music", _params, socket) do
     url = "https://api.spotify.com/v1/me/player/play?device_id=#{socket.assigns.device_id}"
     headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}, {"Content-Type", "application/json"}]
@@ -272,6 +218,7 @@ end
     case res do
       {:ok , %{status_code: 204}} ->
         Logger.info("Playback started ✅")
+        socket = socket.assign(:stream_count, socket.assigns.stream_count + 1)
         {:noreply, socket}
 
       {:ok, %{status_code: 401}} ->
@@ -332,25 +279,6 @@ end
     end
   end
 
-  def handle_event("fetch-queue", _params, socket) do
-    url = "https://api.spotify.com/v1/me/player/queue"
-    res = HTTPoison.get(url, [{"Authorization", "Bearer #{socket.assigns.access_token}"}])
-    case res do
-      {:ok , %{status_code: 200, body: body}} ->
-        IO.inspect(body)
-        {:noreply, socket}
-
-      {:ok, %{status_code: status_code, body: body}} ->
-        Logger.info('#{status_code}')
-        IO.inspect(body)
-        {:noreply, socket}
-
-      {:error, error} ->
-        Logger.info(error)
-        {:noreply, socket}
-    end
-  end
-
   # def handle_info({:timeout, _data, :fetch_token}, socket) do
   #   token = fetch_token(socket)
   #   case token do
@@ -392,6 +320,7 @@ end
   def play_song_on_a_loop(socket) do
     # timer_ref = :erlang.start_timer(5000, self(), :loop_song)
     timer_ref = :erlang.start_timer(33000, self(), :loop_song)
+    # socket = socket.assign(:stream_count, socket.assigns.stream_count + 1)
     assign(socket, timer_ref: timer_ref)
   end
 
@@ -399,6 +328,7 @@ end
   def fetch_token(socket) do
     url = "https://accounts.spotify.com/api/token"
     body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=https://spotify-api.fly.dev"
+    # body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:8080"
     headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
 
     res = HTTPoison.post(url, body, headers)
@@ -460,6 +390,8 @@ end
       {:ok , %{status_code: 204}} ->
         Logger.info("Playback started ✅")
         socket = play_song_on_a_loop(socket)
+        # socket = assign(socket, stream_count: socket.assigns.stream_count + 1)
+        # Logger.info("Stream Count: #{socket.assigns.stream_count}")
         {:noreply, socket}
 
         {:ok , %{status_code: 202}} ->

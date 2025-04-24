@@ -157,8 +157,8 @@ end
     redirect_uri = "https://spotify-api.fly.dev"
     # redirect_uri = "http://localhost:8080"
     scope = "user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state streaming user-read-currently-playing"
-    # state = for _ <- 1..16, into: "", do: <<Enum.random('0123456789abcdef')>>
-    state = for _ <- 1..16, into: "", do: <<Enum.random("0123456789abcdef")>>
+    state = for _ <- 1..16, into: "", do: <<Enum.random('0123456789abcdef')>>
+    # state = for _ <- 1..16, into: "", do: <<Enum.random("0123456789abcdef")>>
 
     query_params = [
       response_type: "code",

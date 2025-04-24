@@ -76,7 +76,7 @@ def render(assigns) do
       <div class="bg-[#1E293B] rounded-lg px-8 py-8">
         <div class="flex justify-between items-center mb-3">
           <span class="font-medium text-4xl">Status</span>
-          <span class="text-3xl bg-[#334155] px-8 py-2 rounded-full">Idle</span>
+          <span class="text-3xl bg-[#334155] px-8 py-2 rounded-full"><%= @stream_status %></span>
         </div>
         <div class="text-3xl text-gray-300 space-y-1">
           <%!-- If Auth is 200 then display a green check mark else display a red x ❌ --%>
@@ -101,12 +101,12 @@ end
     case params["code"] do
       nil ->
         Logger.info(":code is nil ❌")
-        socket = assign(socket, code: nil, state: nil, access_token: nil, stream_count: 0, url: "https://api.spotify.com/v1/artists/...")
+        socket = assign(socket, code: nil, state: nil, access_token: nil, stream_count: 0, url: "https://api.spotify.com/v1/artists/...", stream_status: "Idle")
         {:noreply, socket}
 
       _ ->
         Logger.info(":code in socket ✅")
-        socket = assign(socket, code: params["code"], state: params["state"], access_token: nil, stream_count: 0, url: "https://api.spotify.com/v1/artists/...")
+        socket = assign(socket, code: params["code"], state: params["state"], access_token: nil, stream_count: 0, url: "https://api.spotify.com/v1/artists/...", stream_status: "Idle")
 
         GenServer.cast(self(), :fetch_token)
 
@@ -232,7 +232,9 @@ end
     case res do
       {:ok , %{status_code: 204}} ->
         Logger.info("Playback started ✅")
-        socket = socket.assign(:stream_count, socket.assigns.stream_count + 1)
+        socket = socket
+        |> assign(:stream_count, socket.assigns.stream_count + 1)
+        |> assign(:stream_status, "Streaming")
         {:noreply, socket}
 
       {:ok, %{status_code: 401}} ->
@@ -374,7 +376,7 @@ end
       {:ok , %{status_code: 200, body: body}} ->
         Logger.info("Token Refreshed ✅")
         json_data = Jason.decode!(body)
-        {:noreply, assign(socket, access_token: json_data["access_token"], expires_in: json_data["expires_in"])}
+        {:noreply, assign(socket, access_token: json_data["access_token"], expires_in: json_data["expires_in"], stream_status: "Idle")}
 
       {:ok, %{status_code: status_code, body: body}} ->
         Logger.info(status_code: status_code)

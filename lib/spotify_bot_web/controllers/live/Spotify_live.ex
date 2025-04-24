@@ -54,18 +54,18 @@ def render(assigns) do
 
       <!-- Bot Controls -->
       <div class="bg-[#1E293B] rounded-lg px-4 py-4 flex flex-col md:flex-row justify-between gap-3">
-        <button phx-click="auth-flow" class="bg-[#334155] px-6 py-3 rounded-lg text-5xl hover:bg-[#475569] transition w-full md:w-auto h-auto">🔑 Auth</button>
-        <button phx-click="start-timer" class="bg-[#22C55E] px-4 py-2 rounded-md text-5xl hover:bg-[#16A34A] transition w-full md:w-auto h-auto">▶ Start Bot</button>
-        <button phx-click="kill-timer" class="bg-[#EF4444] px-4 py-2 rounded-md text-5xl hover:bg-[#DC2626] transition w-full md:w-auto h-auto">⏹ Stop Bot</button>
+        <button phx-click="auth-flow" class="bg-gradient-to-r from-blue-500 to-indigo-500 px-8 py-4 rounded-lg text-[2.8rem] font-semibold hover:from-blue-600 hover:to-indigo-600 transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105">🔑 Auth</button>
+        <button phx-click="start-timer" class="bg-gradient-to-r from-green-400 to-green-600 px-8 py-4 rounded-lg text-[2.8rem] font-semibold hover:from-green-500 hover:to-green-700 transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105">▶ Start Bot</button>
+        <button phx-click="kill-timer" class="bg-gradient-to-r from-red-400 to-red-600 px-8 py-4 rounded-lg text-[2.8rem] font-semibold hover:from-red-500 hover:to-red-700 transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105">⏹ Stop Bot</button>
       </div>
 
       <!-- Status Panel -->
       <div class="bg-[#1E293B] rounded-lg px-4 py-4">
         <div class="flex justify-between items-center mb-3">
-          <span class="font-medium text-2xl">Status</span>
-          <span class="text-xl bg-[#334155] px-2 py-1 rounded-full">Idle</span>
+          <span class="font-medium text-4xl">Status</span>
+          <span class="text-3xl bg-[#334155] px-2 py-1 rounded-full">Idle</span>
         </div>
-        <div class="text-2xl text-gray-300 space-y-1">
+        <div class="text-3xl text-gray-300 space-y-1">
           <p><span class="text-gray-400">Current Track:</span> Not playing</p>
           <p><span class="text-gray-400">Stream Count:</span> 0</p>
           <p><span class="text-gray-400">Running Time:</span> 00:00:00</p>

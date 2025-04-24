@@ -48,8 +48,15 @@ def render(assigns) do
 
       <!-- URL Input -->
       <div class="bg-[#1E293B] rounded-lg px-4 py-4 flex items-center gap-3">
-        <input id="song-url" type="text" placeholder={@url} class="flex-1 bg-transparent text-4xl text-gray-200 placeholder-gray-500 focus:outline-none" />
+        <input id="song-url" type="text" placeholder={@url} class="flex-1 bg-transparent text-4xl text-gray-200 placeholder-gray-500 focus:outline-none" phx-debounce="blur" phx-keyup="update-url" phx-target="#song-url" />
         <button phx-click="load-song-url" phx-value-url={@url} class="bg-[#383737] px-[3.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105 outline-[#383737]">Add Song to Bot</button>
+
+        <%!-- <form phx-submit="load-song-url" class="flex items-center gap-3">
+          <input id="song-url" name="url" type="text" placeholder={@url} class="flex-1 bg-transparent text-4xl text-gray-200 placeholder-gray-500 focus:outline-none" phx-debounce="blur" phx-keyup="update-url" />
+          <button type="submit" class="bg-[#383737] px-[3.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105 outline-[#383737]">Add Song to Bot</button>
+        </form> --%>
+
+
         <%!-- <button phx-click="load-song-url" phx-value-url={@url} class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">Add Song to Bot</button> --%>
         <%!--
           1. After the Url has been pasted and the "addded" button has been clicked change the Paste logo to a check mark with a word URL added
@@ -145,10 +152,18 @@ end
     {:noreply, socket}
   end
 
-  def handle_event("load-song-url", %{"url" => url}, socket) do
-    socket = assign(socket, :url, url)
-    Logger.info("URL: #{url}")
+  def handle_event("load-song-url", params, socket) do
+    Logger.info(params)
+  # def handle_event("load-song-url", %{"url" => url}, socket) do
+    # socket = assign(socket, :url, url)
+    # Logger.info("URL: #{url}")
     {:noreply, socket}
+  end
+
+  def handle_event("update-url", %{"value" => url}, socket) do
+    # Process the URL (e.g., validate or store it)
+    Logger.info("Key Up: #{url}")
+    {:noreply, assign(socket, :url, url)}
   end
 
   # Authorization Code Flow: Single Grant token only this is why it is refreshing everytime
@@ -395,6 +410,7 @@ end
     headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}, {"Content-Type", "application/json"}]
     # body = '{
     #   "context_uri": "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
+  #     "context_uri": socket.assigns.url,
     #   "offset": {
     #       "position": 4
     #   },
@@ -402,6 +418,7 @@ end
     # }'
     body = Jason.encode!(%{
       context_uri: "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
+      # context_uri: socket.assigns.url,
       offset: %{position: 4},
       position_ms: 0
     })

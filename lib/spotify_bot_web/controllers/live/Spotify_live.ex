@@ -48,14 +48,14 @@ def render(assigns) do
 
       <!-- URL Input -->
       <div class="bg-[#1E293B] rounded-lg px-4 py-4 flex items-center gap-3">
-        <input type="text" placeholder="https://api.spotify.com/v1/artists/..." class="flex-1 bg-transparent text-4xl text-gray-200 placeholder-gray-500 focus:outline-none" />
+        <input id="song-url" type="text" placeholder={@url} class="flex-1 bg-transparent text-4xl text-gray-200 placeholder-gray-500 focus:outline-none" />
+        <button phx-click="load-song-url" phx-value-url={@url} class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">Load Song into the bot</button>
         <%!--
           1. After the Url has been pasted and the "addded" button has been clicked change the Paste logo to a check mark with a word URL added
           2. If the user wants to add a different URL display a small <span> tag that will remove the URL and change the Icon back to add with no green check mark
          --%>
         <%!-- <button class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">📋 Paste</button> --%>
         <%!-- <button class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">Load the URL into the bot</button> --%>
-        <button class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">Load Song into the bot</button>
         <%!-- <button class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">Fetch Song to stream</button> --%>
       </div>
 
@@ -100,12 +100,13 @@ end
     case params["code"] do
       nil ->
         Logger.info(":code is nil ❌")
-        socket = assign(socket, code: nil, state: nil, access_token: nil, stream_count: 0)
+        socket = assign(socket, code: nil, state: nil, access_token: nil, stream_count: 0, url: "https://api.spotify.com/v1/artists/...")
         {:noreply, socket}
 
       _ ->
         Logger.info(":code in socket ✅")
-        socket = assign(socket, code: params["code"], state: params["state"], access_token: nil, stream_count: 0)
+        socket = assign(socket, code: params["code"], state: params["state"], access_token: nil, stream_count: 0, url: "https://api.spotify.com/v1/artists/...")
+
         GenServer.cast(self(), :fetch_token)
 
         {:noreply, socket}
@@ -140,6 +141,12 @@ end
 
   def handle_event("stop-bot", _params, socket) do
     kill_timer_loop(socket)
+    {:noreply, socket}
+  end
+
+  def handle_event("load-song-url", %{"url" => url}, socket) do
+    socket = assign(socket, :url, url)
+    Logger.info("URL: #{url}")
     {:noreply, socket}
   end
 

@@ -13,7 +13,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
   #     <button phx-click="kill-timer">Stop Timer </button>
   #     <button phx-click="play-music">Play song </button>
   #     </div>
-
   #     <h1>Spotify Web Playback SDK Quick Start</h1>
   #     <script src="https://sdk.scdn.co/spotify-player.js"></script>
   #     <div id="spotify-player" data={@access_token} phx-hook="SpotifyPlayer">
@@ -21,7 +20,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
   #       <button id="togglePlay">Toggle Play</button>
   #       <button id="playSDK">Play</button>
   #     </div>
-
   #   """
   # end
 
@@ -35,7 +33,7 @@ def render(assigns) do
   </head>
   <div class="bg-[#0F172A] text-white min-h-screen flex items-center justify-center text-4xl font-sans px-4">
     <%!-- <div class="w-full max-w-3xl md:w-[80%] space-y-6 text-2xl" > --%>
-    <div class="w-full max-w-[25%] md:w-[80%] space-y-6 text-2xl mb-[30rem]" >
+    <div class="w-full max-w-[25%] md:w-[80%] space-y-8 text-2xl mb-[30rem]" >
 
       <!-- Header -->
       <div class="text-center space-y-1">

@@ -159,7 +159,8 @@ end
     redirect_uri = "https://spotify-api.fly.dev"
     # redirect_uri = "http://localhost:8080"
     scope = "user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state streaming user-read-currently-playing"
-    state = for _ <- 1..16, into: "", do: <<Enum.random('0123456789abcdef')>>
+    # state = for _ <- 1..16, into: "", do: <<Enum.random('0123456789abcdef')>>
+    state = for _ <- 1..16, into: "", do: <<Enum.random("0123456789abcdef")>>
 
     query_params = [
       response_type: "code",
@@ -216,13 +217,18 @@ end
     url = "https://api.spotify.com/v1/me/player/play?device_id=#{socket.assigns.device_id}"
     headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}, {"Content-Type", "application/json"}]
     # offset: is the position of the song in the album in array format starting at 0
-    body = '{
-      "context_uri": "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
-      "offset": {
-          "position": 4
-      },
-      "position_ms": 0
-    }'
+    # body = '{
+    #   "context_uri": "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
+    #   "offset": {
+    #       "position": 4
+    #   },
+    #   "position_ms": 0
+    # }'
+    body = Jason.encode!(%{
+      context_uri: "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
+      offset: %{position: 4},
+      position_ms: 0
+    })
 
     res = HTTPoison.put(url, body, headers)
     case res do
@@ -279,7 +285,7 @@ end
         {:noreply, socket}
 
       {:ok, %{status_code: status_code, body: body}} ->
-        Logger.info('#{status_code}')
+        Logger.info("#{status_code}")
         IO.inspect(body)
         {:noreply, socket}
 
@@ -387,13 +393,18 @@ end
   def play_song(socket) do
     url = "https://api.spotify.com/v1/me/player/play?device_id=#{socket.assigns.device_id}"
     headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}, {"Content-Type", "application/json"}]
-    body = '{
-      "context_uri": "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
-      "offset": {
-          "position": 4
-      },
-      "position_ms": 0
-    }'
+    # body = '{
+    #   "context_uri": "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
+    #   "offset": {
+    #       "position": 4
+    #   },
+    #   "position_ms": 0
+    # }'
+    body = Jason.encode!(%{
+      context_uri: "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
+      offset: %{position: 4},
+      position_ms: 0
+    })
 
     res = HTTPoison.put(url, body, headers)
     case res do

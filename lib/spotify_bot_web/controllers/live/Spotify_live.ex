@@ -30,6 +30,8 @@ def render(assigns) do
     <head>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://sdk.scdn.co/spotify-player.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   </head>
   <div class="bg-[#0F172A] text-white min-h-screen flex items-center justify-center text-4xl font-sans px-4">
     <%!-- <div class="w-full max-w-3xl md:w-[80%] space-y-6 text-2xl" > --%>
@@ -49,7 +51,8 @@ def render(assigns) do
       <!-- URL Input -->
       <div class="bg-[#1E293B] rounded-lg px-4 py-4 flex items-center gap-3">
         <input id="song-url" type="text" placeholder={@url} class="flex-1 bg-transparent text-4xl text-gray-200 placeholder-gray-500 focus:outline-none" />
-        <button phx-click="load-song-url" phx-value-url={@url} class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">Load Song into the bot</button>
+        <button phx-click="load-song-url" phx-value-url={@url} class="bg-[#383737] px-[3.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105 outline-[#383737]">Add Song to Bot</button>
+        <%!-- <button phx-click="load-song-url" phx-value-url={@url} class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">Add Song to Bot</button> --%>
         <%!--
           1. After the Url has been pasted and the "addded" button has been clicked change the Paste logo to a check mark with a word URL added
           2. If the user wants to add a different URL display a small <span> tag that will remove the URL and change the Icon back to add with no green check mark
@@ -61,9 +64,9 @@ def render(assigns) do
 
       <!-- Bot Controls -->
       <div class="bg-[#1E293B] rounded-lg px-6 py-4 flex flex-col md:flex-row justify-between gap-3">
-        <button phx-click="auth-flow" class="bg-[#383737] px-[5.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105 outline-[#383737]">🔑 Auth</button>
-        <button phx-click="start-timer" class="bg-[#383737] px-[5.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105">▶ Start Bot</button>
-        <button phx-click="kill-timer" class="bg-[#383737] px-[5.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105">⏹ Stop Bot</button>
+        <button phx-click="auth-flow" class="bg-[#383737] px-[5.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105 outline-[#383737]"><i class="fa-solid fa-key mr-2"></i> Auth</button>
+        <button phx-click="start-timer" class="bg-[#383737] px-[5.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105"><i class="fa-solid fa-play mr-2"></i> Start Bot</button>
+        <button phx-click="kill-timer" class="bg-[#383737] px-[5.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105"> <i class="fas fa-stop mr-2"></i> Stop Bot</button>
 
         <%!-- <button phx-click="auth-flow" class="bg-gradient-to-r from-blue-500 to-indigo-500 px-8 py-4 rounded-lg text-[2.8rem] font-semibold hover:from-blue-600 hover:to-indigo-600 transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105">🔑 Auth</button> --%>
         <%!-- <button phx-click="start-timer" class="bg-gradient-to-r from-green-400 to-green-600 px-8 py-4 rounded-lg text-[2.8rem] font-semibold hover:from-green-500 hover:to-green-700 transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105">▶ Start Bot</button> --%>

@@ -5,7 +5,8 @@ config :spotify_bot, SpotifyBot.Repo,
   username: "spotify_api_user",
   password: "postgres",
   hostname: "localhost",
-  database: "spotify_bot_db",
+  # database: "spotify_bot_db",
+  database: "spotify_botter_db",
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 

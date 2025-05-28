@@ -463,14 +463,16 @@ end
     case res do
       {:ok , %{status_code: 204}} ->
         Logger.info("Playback started ✅")
-        socket = play_song_on_a_loop(socket)
-        # socket = assign(socket, stream_count: socket.assigns.stream_count + 1)
-        # Logger.info("Stream Count: #{socket.assigns.stream_count}")
+        socket = socket
+                |> play_song_on_a_loop()
+                |> assign(:stream_status, "Streaming")
         {:noreply, socket}
 
-        {:ok , %{status_code: 202}} ->
+      {:ok , %{status_code: 202}} ->
         Logger.info("Play() not fully completed 🟠")
-        socket = play_song_on_a_loop(socket)
+        socket = socket
+                |> play_song_on_a_loop()
+                |> assign(:stream_status, "Streaming")
         {:noreply, socket}
 
       {:ok, %{status_code: 401}} ->

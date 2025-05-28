@@ -84,9 +84,9 @@ def render(assigns) do
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:text-xl md:text-3xl text-gray-300">
             <div class="space-y-3">
               <p><span class="text-gray-400">Auth:</span> <%= if @access_token, do: "✅", else: "❌" %></p>
-              <p><span class="text-gray-400">Device ID:</span> <%= if @device_id !== nil, do: "✅", else: "❌" %></p>
+              <p><span class="text-gray-400">Device ID:</span> <%= if @device_id !== nil, do: "Loaded ✅", else: "❌" %></p>
               <%!-- <p><span class="text-gray-400">Device ID:</span> <%= if @device_id !== nil, do: @device_id, else: "❌" %></p> --%>
-              <p><span class="text-gray-400">Song Data:</span> <%= if @url != "https://api.spotify.com/v1/artists/...", do: "✅", else: "❌" %></p>
+              <p><span class="text-gray-400">Song Data:</span> <%= if @url != "https://api.spotify.com/v1/artists/...", do: " Loaded ✅", else: "❌" %></p>
             </div>
             <div class="space-y-3">
               <p><span class="text-gray-400">Current Track:</span> Not playing</p>

@@ -88,7 +88,7 @@ def render(assigns) do
               <p><span class="text-gray-400">Song Data:</span> <%= if @url != "https://api.spotify.com/v1/artists/...", do: " Loaded ✅", else: "❌" %></p>
             </div>
             <div class="space-y-3">
-              <p><span class="text-gray-400">Current Track:</span> Not playing</p>
+              <p><span class="text-gray-400">Current Track:</span><%= if @track_name !== nil, do: @track_name, else: "Not Playing" %></p>
               <p><span class="text-gray-400">Stream Count:</span> <%= @stream_count %></p>
               <p><span class="text-gray-400">Token Expires in:</span> <%= if @expires_in !== nil, do: format_time(@expires_in), else: "00:00:00" %></p>
             </div>
@@ -157,13 +157,13 @@ end
       nil ->
         Logger.info(":code is nil ❌")
         # Change URL socket state to stream_url
-        socket = assign(socket, code: nil, state: nil, access_token: nil, expires_in: nil, device_id: nil, stream_count: 0, url: "https://api.spotify.com/v1/artists/...", stream_status: "Idle", stream_time: nil)
+        socket = assign(socket, code: nil, state: nil, access_token: nil, expires_in: nil, device_id: nil, track_name: nil, stream_count: 0, url: "https://api.spotify.com/v1/artists/...", stream_status: "Idle", stream_time: nil)
         {:noreply, socket}
 
       _ ->
         Logger.info(":code in socket ✅")
         # Is assigning URL: to the default string fucking it up?
-        socket = assign(socket, code: params["code"], state: params["state"], access_token: nil, expires_in: nil, device_id: nil, stream_count: 0, url: "https://api.spotify.com/v1/artists/...", stream_status: "Idle", stream_time: nil)
+        socket = assign(socket, code: params["code"], state: params["state"], access_token: nil, expires_in: nil, device_id: nil, track_name: nil, stream_count: 0, url: "https://api.spotify.com/v1/artists/...", stream_status: "Idle", stream_time: nil)
 
         GenServer.cast(self(), :fetch_token)
 
@@ -205,10 +205,17 @@ end
     {:noreply, socket}
   end
 
+  @doc """
+  Handles the add-song-url event triggered by the URL input form.
+  1. Assigns the URL to socket state
+  2. Fetches song metadata from Spotify API
+  3. Updates LiveView with track name
+  """
   def handle_event("add-song-url", %{"url" => url}, socket) do
-    socket = assign(socket, :url, url)
-    Logger.info("Song URL added: #{url}")
-    {:noreply, socket}
+    with socket <- assign(socket, :url, url),
+         {:noreply, updated_socket} <- fetch_track_data(socket, url) do
+      {:noreply, updated_socket}
+    end
   end
 
   def handle_event("update-url", %{"value" => url}, socket) do
@@ -465,6 +472,36 @@ end
       end
   end
 
+  @doc """
+  Fetches song metadata from Spotify API using the track ID.
+  Returns track name and updates LiveView state.
+
+  Example response:
+  ```
+  {
+    "name": "Track Name",
+    "artists": [...],
+    "album": {...}
+  }
+  ```
+  """
+  def fetch_track_data(socket, _url) do
+    url = "https://api.spotify.com/v1/tracks/11dFghVXANMlKmJXsNCbNl"
+    headers = [
+      {"Authorization", "Bearer #{socket.assigns.access_token}"},
+      {"Content-Type", "application/json"}
+    ]
+
+    case HTTPoison.get(url, headers) do
+      {:ok, %{status_code: 200, body: body}} ->
+        track_data = Jason.decode!(body)
+        {:noreply, assign(socket, track_name: track_data["name"])}
+
+      {:error, error} ->
+        Logger.error("Failed to fetch song data: #{inspect(error)}")
+        {:noreply, socket}
+    end
+  end
 
   def play_song(socket) do
     url = "https://api.spotify.com/v1/me/player/play?device_id=#{socket.assigns.device_id}"

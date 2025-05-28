@@ -84,9 +84,9 @@ def render(assigns) do
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:text-xl md:text-3xl text-gray-300">
             <div class="space-y-3">
               <p><span class="text-gray-400">Auth:</span> <%= if @access_token, do: "✅", else: "❌" %></p>
-              <p><span class="text-gray-400">Device ID:</span> <%= if @device_id !== nil, do: "✅", else: "❌" %></p>
+              <p><span class="text-gray-400">Device ID:</span> <%= if @device_id !== nil, do: "Loaded ✅", else: "❌" %></p>
               <%!-- <p><span class="text-gray-400">Device ID:</span> <%= if @device_id !== nil, do: @device_id, else: "❌" %></p> --%>
-              <p><span class="text-gray-400">Song Data:</span> <%= if @url != "https://api.spotify.com/v1/artists/...", do: "✅", else: "❌" %></p>
+              <p><span class="text-gray-400">Song Data:</span> <%= if @url != "https://api.spotify.com/v1/artists/...", do: " Loaded ✅", else: "❌" %></p>
             </div>
             <div class="space-y-3">
               <p><span class="text-gray-400">Current Track:</span> Not playing</p>
@@ -292,7 +292,6 @@ end
       {:ok , %{status_code: 204}} ->
         Logger.info("Playback started ✅")
         socket = socket
-        |> assign(:stream_count, socket.assigns.stream_count + 1)
         |> assign(:stream_status, "Streaming")
         {:noreply, socket}
 
@@ -371,6 +370,7 @@ end
   end
 
   def handle_info({:timeout, _data, :loop_song}, socket) do
+    socket = assign(socket, stream_count: socket.assigns.stream_count + 1)
     play_song(socket)
   end
 
@@ -395,7 +395,6 @@ end
   def play_song_on_a_loop(socket) do
     timer_ref = :erlang.start_timer(5000, self(), :loop_song)
     # timer_ref = :erlang.start_timer(33000, self(), :loop_song)
-    # socket = socket.assign(:stream_count, socket.assigns.stream_count + 1)
     assign(socket, timer_ref: timer_ref)
   end
 

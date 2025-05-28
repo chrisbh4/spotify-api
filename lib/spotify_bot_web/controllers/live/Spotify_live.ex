@@ -4,25 +4,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
   use Phoenix.LiveView
   require Logger
 
-  # def render(assigns) do
-  #   ~H"""
-  #     <div class='flex justify-center w-full bg-red-500 '>
-  #     <h1>Spotify API access point </h1>
-  #     <button phx-click="auth-flow">Authentication Flow </button>
-  #     <button phx-click="start-timer">Start Timer </button>
-  #     <button phx-click="kill-timer">Stop Timer </button>
-  #     <button phx-click="play-music">Play song </button>
-  #     </div>
-  #     <h1>Spotify Web Playback SDK Quick Start</h1>
-  #     <script src="https://sdk.scdn.co/spotify-player.js"></script>
-  #     <div id="spotify-player" data={@access_token} phx-hook="SpotifyPlayer">
-  #       <script id="sdk-script"></script>
-  #       <button id="togglePlay">Toggle Play</button>
-  #       <button id="playSDK">Play</button>
-  #     </div>
-  #   """
-  # end
-
 def render(assigns) do
   ~H"""
     <head>
@@ -40,27 +21,26 @@ def render(assigns) do
           </h1>
           <p class="text-4xl md:text-2xl text-gray-400">Automate your Spotify streaming with ease</p>
         </div>
+
+
         <!-- URL Input -->
         <div class="bg-[#1E293B] rounded-lg px-4 py-6 flex items-center gap-3">
           <form phx-submit="add-song-url" class="flex items-center gap-3 w-full">
             <input id="song-url" name="url" type="text" placeholder={@url} class="flex-1 bg-transparent text-4xl text-gray-200 placeholder-gray-500 focus:outline-none" phx-debounce="blur" />
             <button type="submit" class="bg-[#383737] px-[3.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105 outline-[#383737]">Add Song to Bot</button>
           </form>
-
-          <%!-- <input id="song-url" type="text" placeholder={@url} class="flex-1 bg-transparent text-4xl text-gray-200 placeholder-gray-500 focus:outline-none" phx-debounce="blur" phx-keyup="update-url" phx-target="#song-url" />
-          <button phx-click="add-song-url" phx-value-url={@url} class="bg-[#383737] px-[3.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105 outline-[#383737]">Add Song to Bot</button> --%>
-          <%!-- <input id="song-url" name="url" type="text" placeholder={@url} class="flex-1 bg-transparent text-4xl text-gray-200 placeholder-gray-500 focus:outline-none" phx-debounce="blur" phx-keyup="update-url" /> --%>
-          <%!-- <button phx-click="add-song-url" phx-value-url={@url} class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">Add Song to Bot</button> --%>
-          <%!-- <button class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">📋 Paste</button> --%>
-          <%!-- <button class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">Load the URL into the bot</button> --%>
-          <%!-- <button class="bg-[#334155] text-2xl px-4 py-2 rounded-md hover:bg-[#475569] transition">Fetch Song to stream</button> --%>
         </div>
 
         <!-- Bot Controls -->
-        <div class="bg-[#1E293B] rounded-lg px-6 py-4 flex flex-col md:flex-row justify-between gap-3">
+        <div  class="bg-[#1E293B] rounded-lg px-6 py-4 flex flex-col md:flex-row justify-between gap-3">
+        <%!-- <div id="spotify-player" data={@1} phx-hook="SpotifyPlayer" class="bg-[#1E293B] rounded-lg px-6 py-4 flex flex-col md:flex-row justify-between gap-3"> --%>
+          <script src="https://sdk.scdn.co/spotify-player.js"></script>
+          <script id="sdk-script"></script>
           <button phx-click="auth-flow" class="bg-[#383737] px-[5.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105 outline-[#383737]"><i class="fa-solid fa-key mr-2"></i> Auth</button>
           <button phx-click="start-timer" class="bg-[#383737] px-[5.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105"><i class="fa-solid fa-play mr-2"></i> Start Bot</button>
           <button phx-click="kill-timer" class="bg-[#383737] px-[5.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105"> <i class="fas fa-stop mr-2"></i> Stop Bot</button>
+          <%!-- <div id="togglePlay"></div>
+          <div id="playSDK"></div> --%>
         </div>
 
         <!-- Status Panel -->
@@ -71,16 +51,54 @@ def render(assigns) do
           </div>
           <div class="text-3xl text-gray-300 space-y-1">
             <p><span class="text-gray-400">Auth:</span> <%= if @access_token, do: "✅", else: "❌" %></p>
+            <p><span class="text-gray-400">Device ID:</span> <%= if @device_id !== nil, do: @device_id, else: "❌" %></p>
+            <p><span class="text-gray-400">Song Data Loaded:</span> <%= if @url != "https://api.spotify.com/v1/artists/...", do: "✅", else: "❌" %></p>
             <p><span class="text-gray-400">Current Track:</span> Not playing</p>
             <p><span class="text-gray-400">Stream Count:</span> <%= @stream_count %></p>
-            <p><span class="text-gray-400">Running Time:</span> <%= @stream_time || "00:00:00" %></p>
+            <p><span class="text-gray-400">Token Refresh in :</span> 00:00:00 </p>
+            <%!-- <p><span class="text-gray-400">Running Time:</span> <%= @stream_time || "00:00:00" %></p> --%>
           </div>
         </div>
+
+        <h1>Spotify Web Playback SDK Quick Start</h1>
+        <script src="https://sdk.scdn.co/spotify-player.js"></script>
+        <div id="spotify-player" data={@access_token} phx-hook="SpotifyPlayer">
+          <script id="sdk-script"></script>
+          <button id="togglePlay">Toggle Play</button>
+          <button id="playSDK">Play</button>
+        </div>
       </div>
+
+      <%!-- <div class='flex justify-center w-full bg-red-500 '>
+        <h1>Spotify API access point </h1>
+        <button phx-click="auth-flow">Authentication Flow </button>
+        <button phx-click="start-timer">Start Timer </button>
+        <button phx-click="kill-timer">Stop Timer </button>
+        <button phx-click="play-music">Play song </button>
+        </div> --%>
     </div>
   """
 end
 
+# * OLD UI for spotify Bot
+# def render(assigns) do
+#     ~H"""
+#       <div class='flex justify-center w-full bg-red-500 '>
+#       <h1>Spotify API access point </h1>
+#       <button phx-click="auth-flow">Authentication Flow </button>
+#       <button phx-click="start-timer">Start Timer </button>
+#       <button phx-click="kill-timer">Stop Timer </button>
+#       <button phx-click="play-music">Play song </button>
+#       </div>
+#       <h1>Spotify Web Playback SDK Quick Start</h1>
+#       <script src="https://sdk.scdn.co/spotify-player.js"></script>
+#       <div id="spotify-player" data={@access_token} phx-hook="SpotifyPlayer">
+#         <script id="sdk-script"></script>
+#         <button id="togglePlay">Toggle Play</button>
+#         <button id="playSDK">Play</button>
+#       </div>
+#     """
+#   end
 
 
   def mount(_params, _, socket) do
@@ -91,13 +109,14 @@ end
     case params["code"] do
       nil ->
         Logger.info(":code is nil ❌")
-        socket = assign(socket, code: nil, state: nil, access_token: nil, stream_count: 0, url: "https://api.spotify.com/v1/artists/...", stream_status: "Idle", stream_time: nil)
+        # Change URL socket state to stream_url
+        socket = assign(socket, code: nil, state: nil, access_token: nil, device_id: nil, stream_count: 0, url: "https://api.spotify.com/v1/artists/...", stream_status: "Idle", stream_time: nil)
         {:noreply, socket}
 
       _ ->
         Logger.info(":code in socket ✅")
         # Is assigning URL: to the default string fucking it up?
-        socket = assign(socket, code: params["code"], state: params["state"], access_token: nil, stream_count: 0, url: "https://api.spotify.com/v1/artists/...", stream_status: "Idle", stream_time: nil)
+        socket = assign(socket, code: params["code"], state: params["state"], access_token: nil, device_id: nil, stream_count: 0, url: "https://api.spotify.com/v1/artists/...", stream_status: "Idle", stream_time: nil)
 
         GenServer.cast(self(), :fetch_token)
 
@@ -151,10 +170,12 @@ end
 
   # Authorization Code Flow: Single Grant token only this is why it is refreshing everytime
   def handle_event("auth-flow", _params, socket) do
-    url = "https://accounts.spotify.com/authorize?"
+    # url = "https://accounts.spotify.com/authorize?"
+    url = "https://accounts.spotify.com/authorize/?"
     # redirect_uri = "https://spotify-api.fly.dev"
     redirect_uri = "http://localhost:8080"
-    scope = "user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state streaming user-read-currently-playing"
+    # scope = "user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state streaming user-read-currently-playing"
+    scope = "user-read-email user-read-private streaming user-read-currently-playing"
     state = for _ <- 1..16, into: "", do: <<Enum.random('0123456789abcdef')>>
     # state = for _ <- 1..16, into: "", do: <<Enum.random("0123456789abcdef")>>
 
@@ -346,8 +367,8 @@ end
     # body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=https://spotify-api.fly.dev"
     body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:8080"
     headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
-
     res = HTTPoison.post(url, body, headers)
+
     case res do
       {:ok , %{status_code: 200, body: body}} ->
         Logger.info("Access Token ✅")

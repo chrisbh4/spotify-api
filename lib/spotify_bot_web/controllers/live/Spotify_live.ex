@@ -70,13 +70,22 @@ def render(assigns) do
         <div class="bg-[#1E293B] rounded-lg p-4 md:p-8">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <span class="text-2xl md:text-3xl font-medium">Status</span>
-            <span class="text-lg md:text-xl bg-[#334155] px-4 md:px-8 py-2 rounded-full"><%= @stream_status %></span>
+            <span class={
+              "text-lg md:text-xl px-4 md:px-8 py-2 rounded-full #{
+                cond do
+                  @stream_status == "Streaming" -> "bg-green-500"
+                  @stream_status == "Paused" -> "bg-red-300"
+                  true -> "bg-[#334155]"
+                end
+              }"
+            }><%= @stream_status %></span>
           </div>
           <%!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-base md:text-3xl text-gray-300"> --%>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:text-xl md:text-3xl text-gray-300">
             <div class="space-y-3">
               <p><span class="text-gray-400">Auth:</span> <%= if @access_token, do: "✅", else: "❌" %></p>
-              <p><span class="text-gray-400">Device ID:</span> <%= if @device_id !== nil, do: @device_id, else: "❌" %></p>
+              <p><span class="text-gray-400">Device ID:</span> <%= if @device_id !== nil, do: "✅", else: "❌" %></p>
+              <%!-- <p><span class="text-gray-400">Device ID:</span> <%= if @device_id !== nil, do: @device_id, else: "❌" %></p> --%>
               <p><span class="text-gray-400">Song Data:</span> <%= if @url != "https://api.spotify.com/v1/artists/...", do: "✅", else: "❌" %></p>
             </div>
             <div class="space-y-3">

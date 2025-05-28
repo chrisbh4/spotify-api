@@ -31,11 +31,11 @@ def render(assigns) do
               name="url"
               type="text"
               placeholder={@url}
-              class="w-full md:flex-1 bg-transparent text-lg md:text-xl text-gray-200 placeholder-gray-500 focus:outline-none p-3 rounded-lg border border-gray-700"
+              class="w-full md:flex-1 bg-transparent sm:text-xl md:text-xl text-gray-200 placeholder-gray-500 focus:outline-none p-3 rounded-lg border border-gray-700"
             />
             <button
               type="submit"
-              class="w-full md:w-auto bg-[#383737] px-6 py-3 rounded-lg text-lg md:text-xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+              class="w-full md:w-auto bg-[#383737] h-20 md:h-auto sm:py-8 md:px-6 md:py-3 rounded-lg sm:text-xl md:text-xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
             >
               Add Song to Bot
             </button>
@@ -47,19 +47,19 @@ def render(assigns) do
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button
               phx-click="auth-flow"
-              class="bg-[#383737] h-20 px-6 py-4 rounded-lg text-lg md:text-3xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+              class="bg-[#383737] h-20 px-6 py-4 rounded-lg sm:text-2xl md:text-3xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
             >
               <i class="fa-solid fa-key mr-2"></i> Auth
             </button>
             <button
               phx-click="start-timer"
-              class="bg-[#383737] h-20 px-6 py-4 rounded-lg text-lg md:text-3xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+              class="bg-[#383737] h-20 px-6 py-4 rounded-lg sm:text-2xl md:text-3xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
             >
               <i class="fa-solid fa-play mr-2"></i> Start Bot
             </button>
             <button
               phx-click="kill-timer"
-              class="bg-[#383737] h-20 px-6 py-4 rounded-lg text-lg md:text-3xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+              class="bg-[#383737] h-20 px-6 py-4 rounded-lg sm:text-2xl md:text-3xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
             >
               <i class="fas fa-stop mr-2"></i> Stop Bot
             </button>
@@ -72,7 +72,8 @@ def render(assigns) do
             <span class="text-2xl md:text-3xl font-medium">Status</span>
             <span class="text-lg md:text-xl bg-[#334155] px-4 md:px-8 py-2 rounded-full"><%= @stream_status %></span>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-base md:text-3xl text-gray-300">
+          <%!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-base md:text-3xl text-gray-300"> --%>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:text-xl md:text-3xl text-gray-300">
             <div class="space-y-3">
               <p><span class="text-gray-400">Auth:</span> <%= if @access_token, do: "✅", else: "❌" %></p>
               <p><span class="text-gray-400">Device ID:</span> <%= if @device_id !== nil, do: @device_id, else: "❌" %></p>

@@ -175,6 +175,7 @@ end
 
   # Disable The stream but test if the count stays after the loop happens again
   def handle_event("start-timer", _params, socket) do
+    socket = assign(socket, :stream_status, "Loading...")
     start_timer()
     {:noreply, socket}
   end

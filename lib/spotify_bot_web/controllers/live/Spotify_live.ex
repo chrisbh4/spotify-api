@@ -71,10 +71,10 @@ def render(assigns) do
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <span class="text-2xl md:text-3xl font-medium">Status</span>
             <span class={
-              "text-lg md:text-xl px-4 md:px-8 py-2 rounded-full #{
+              "text-2xl md:text-2xl px-4 md:px-8 py-2 rounded-full font-bold #{
                 cond do
                   @stream_status == "Streaming" -> "bg-green-500"
-                  @stream_status == "Paused" -> "bg-red-300"
+                  @stream_status == "Paused" -> "bg-red-400"
                   true -> "bg-[#334155]"
                 end
               }"
@@ -180,6 +180,7 @@ end
   end
 
   def handle_event("kill-timer", _params, socket) do
+    socket = assign(socket, :stream_status, "Paused")
     kill_timer_loop(socket)
     {:noreply, socket}
   end
@@ -387,7 +388,7 @@ end
   def kill_timer_loop(socket) do
     :erlang.cancel_timer(socket.assigns.timer_ref)
     pause_song(socket)
-    Logger.info("Timer stopped")
+    Logger.info("Bot timer stopped")
   end
 
   def play_song_on_a_loop(socket) do
@@ -508,18 +509,17 @@ end
     headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}]
     res = HTTPoison.put(url, "", headers)
     case res do
-      {:ok , %{status_code: 204}} ->
+      {:ok , %{status_code: 200}} ->
         Logger.info("Paused process ✅")
-        {:noreply, socket}
+      {:noreply, socket}
 
-        {:ok , %{status_code: 202}} ->
-        Logger.info("Paused process with Issues ⏸️")
-        {:noreply, socket}
+      {:ok , %{status_code: 202}} ->
+        Logger.info("Paused process with Issues 🟠")
+      {:noreply, socket}
 
-      {:ok, %{status_code: status_code, body: body}} ->
-        Logger.info("Paused failed ❌")
+      {:ok, %{status_code: status_code, body: _body}} ->
+        Logger.info("Pause request error ❌")
         Logger.info(status_code: status_code)
-        IO.inspect(body)
         {:noreply, socket}
 
       {:error, error} ->

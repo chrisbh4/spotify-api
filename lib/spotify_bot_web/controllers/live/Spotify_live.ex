@@ -11,71 +11,99 @@ def render(assigns) do
       <script src="https://sdk.scdn.co/spotify-player.js"></script>
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     </head>
-    <div class="bg-[#0F172A] text-white min-h-screen flex items-center justify-center text-4xl font-sans px-4">
-      <div class="w-full max-w-[25%] md:w-[80%] space-y-8 text-2xl mb-[30rem]" >
+    <div class="bg-[#0F172A] text-white min-h-screen p-4 md:p-8">
+      <div class="max-w-7xl mx-auto space-y-6">
         <!-- Header -->
-        <div class="text-center space-y-1">
-          <h1 class="text-7xl font-semibold flex items-center justify-center gap-3">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="h-[5rem] md:h-[6rem]" alt="Spotify" />
-            Spotify Stream Bot
+        <div class="text-center space-y-4">
+          <h1 class="text-4xl md:text-7xl font-semibold flex items-center justify-center gap-3">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="h-10 md:h-16" alt="Spotify" />
+            <span class="hidden md:inline">Spotify Stream Bot</span>
+            <span class="md:hidden">Stream Bot</span>
           </h1>
-          <p class="text-4xl md:text-2xl text-gray-400">Automate your Spotify streaming with ease</p>
+          <p class="text-lg md:text-2xl text-gray-400">Automate your Spotify streaming with ease</p>
         </div>
 
-
         <!-- URL Input -->
-        <div class="bg-[#1E293B] rounded-lg px-4 py-6 flex items-center gap-3">
-          <form phx-submit="add-song-url" class="flex items-center gap-3 w-full">
-            <input id="song-url" name="url" type="text" placeholder={@url} class="flex-1 bg-transparent text-4xl text-gray-200 placeholder-gray-500 focus:outline-none" phx-debounce="blur" />
-            <button type="submit" class="bg-[#383737] px-[3.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105 outline-[#383737]">Add Song to Bot</button>
+        <div class="bg-[#1E293B] rounded-lg p-4 md:p-6">
+          <form phx-submit="add-song-url" class="flex flex-col md:flex-row items-center gap-4">
+            <input
+              id="song-url"
+              name="url"
+              type="text"
+              placeholder={@url}
+              class="w-full md:flex-1 bg-transparent text-lg md:text-xl text-gray-200 placeholder-gray-500 focus:outline-none p-3 rounded-lg border border-gray-700"
+            />
+            <button
+              type="submit"
+              class="w-full md:w-auto bg-[#383737] px-6 py-3 rounded-lg text-lg md:text-xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+            >
+              Add Song to Bot
+            </button>
           </form>
         </div>
 
         <!-- Bot Controls -->
-        <div  class="bg-[#1E293B] rounded-lg px-6 py-4 flex flex-col md:flex-row justify-between gap-3">
-        <%!-- <div id="spotify-player" data={@1} phx-hook="SpotifyPlayer" class="bg-[#1E293B] rounded-lg px-6 py-4 flex flex-col md:flex-row justify-between gap-3"> --%>
-          <script src="https://sdk.scdn.co/spotify-player.js"></script>
-          <script id="sdk-script"></script>
-          <button phx-click="auth-flow" class="bg-[#383737] px-[5.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105 outline-[#383737]"><i class="fa-solid fa-key mr-2"></i> Auth</button>
-          <button phx-click="start-timer" class="bg-[#383737] px-[5.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105"><i class="fa-solid fa-play mr-2"></i> Start Bot</button>
-          <button phx-click="kill-timer" class="bg-[#383737] px-[5.5rem] py-4 rounded-lg text-[1.8rem] font-semibold border-solid border-[#383737] transition w-full md:w-auto h-auto shadow-lg transform hover:scale-105"> <i class="fas fa-stop mr-2"></i> Stop Bot</button>
-          <%!-- <div id="togglePlay"></div>
-          <div id="playSDK"></div> --%>
+        <div class="bg-[#1E293B] rounded-lg p-4 md:p-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button
+              phx-click="auth-flow"
+              class="bg-[#383737] h-20 px-6 py-4 rounded-lg text-lg md:text-3xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+            >
+              <i class="fa-solid fa-key mr-2"></i> Auth
+            </button>
+            <button
+              phx-click="start-timer"
+              class="bg-[#383737] h-20 px-6 py-4 rounded-lg text-lg md:text-3xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+            >
+              <i class="fa-solid fa-play mr-2"></i> Start Bot
+            </button>
+            <button
+              phx-click="kill-timer"
+              class="bg-[#383737] h-20 px-6 py-4 rounded-lg text-lg md:text-3xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+            >
+              <i class="fas fa-stop mr-2"></i> Stop Bot
+            </button>
+          </div>
         </div>
 
         <!-- Status Panel -->
-        <div class="bg-[#1E293B] rounded-lg px-8 py-8">
-          <div class="flex justify-between items-center mb-3">
-            <span class="font-medium text-4xl">Status</span>
-            <span class="text-3xl bg-[#334155] px-8 py-2 rounded-full"><%= @stream_status %></span>
+        <div class="bg-[#1E293B] rounded-lg p-4 md:p-8">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <span class="text-2xl md:text-3xl font-medium">Status</span>
+            <span class="text-lg md:text-xl bg-[#334155] px-4 md:px-8 py-2 rounded-full"><%= @stream_status %></span>
           </div>
-          <div class="text-3xl text-gray-300 space-y-1">
-            <p><span class="text-gray-400">Auth:</span> <%= if @access_token, do: "✅", else: "❌" %></p>
-            <p><span class="text-gray-400">Device ID:</span> <%= if @device_id !== nil, do: @device_id, else: "❌" %></p>
-            <p><span class="text-gray-400">Song Data Loaded:</span> <%= if @url != "https://api.spotify.com/v1/artists/...", do: "✅", else: "❌" %></p>
-            <p><span class="text-gray-400">Current Track:</span> Not playing</p>
-            <p><span class="text-gray-400">Stream Count:</span> <%= @stream_count %></p>
-            <p><span class="text-gray-400">Token Refresh in :</span> 00:00:00 </p>
-            <%!-- <p><span class="text-gray-400">Running Time:</span> <%= @stream_time || "00:00:00" %></p> --%>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-base md:text-3xl text-gray-300">
+            <div class="space-y-3">
+              <p><span class="text-gray-400">Auth:</span> <%= if @access_token, do: "✅", else: "❌" %></p>
+              <p><span class="text-gray-400">Device ID:</span> <%= if @device_id !== nil, do: @device_id, else: "❌" %></p>
+              <p><span class="text-gray-400">Song Data:</span> <%= if @url != "https://api.spotify.com/v1/artists/...", do: "✅", else: "❌" %></p>
+            </div>
+            <div class="space-y-3">
+              <p><span class="text-gray-400">Current Track:</span> Not playing</p>
+              <p><span class="text-gray-400">Stream Count:</span> <%= @stream_count %></p>
+              <p><span class="text-gray-400">Token Refresh:</span> 00:00:00</p>
+            </div>
           </div>
         </div>
 
-        <h1>Spotify Web Playback SDK Quick Start</h1>
-        <script src="https://sdk.scdn.co/spotify-player.js"></script>
-        <div id="spotify-player" data={@access_token} phx-hook="SpotifyPlayer">
-          <script id="sdk-script"></script>
-          <button id="togglePlay">Toggle Play</button>
-          <button id="playSDK">Play</button>
+        <!-- Player -->
+        <div id="spotify-player" data={@access_token} phx-hook="SpotifyPlayer" class="bg-[#1E293B] rounded-lg p-4 md:p-6">
+          <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
+            <button
+              id="togglePlay"
+              class="w-full md:w-auto bg-[#383737] px-6 py-3 rounded-lg text-lg md:text-xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+            >
+              Toggle Play
+            </button>
+            <button
+              id="playSDK"
+              class="w-full md:w-auto bg-[#383737] px-6 py-3 rounded-lg text-lg md:text-xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+            >
+              Play
+            </button>
+          </div>
         </div>
       </div>
-
-      <%!-- <div class='flex justify-center w-full bg-red-500 '>
-        <h1>Spotify API access point </h1>
-        <button phx-click="auth-flow">Authentication Flow </button>
-        <button phx-click="start-timer">Start Timer </button>
-        <button phx-click="kill-timer">Stop Timer </button>
-        <button phx-click="play-music">Play song </button>
-        </div> --%>
     </div>
   """
 end

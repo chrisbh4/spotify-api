@@ -46,12 +46,6 @@ def render(assigns) do
               <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">2</div>
               <div class="sm:text-2xl md:text-2xl">
                 <p>Paste a Spotify song URL into the input field and click <span class="font-semibold text-white">Add Song to Bot</span>.</p>
-                <%!-- <div class="mt-2 p-3 bg-[#383737] rounded-lg">
-                  <p class="text-gray-400 text-xs mb-1">Test URL (click to copy):</p>
-                  <code class="text-xs md:sm:text-2xl cursor-pointer" onclick="navigator.clipboard.writeText(this.textContent)" title="Click to copy">
-                    https://open.spotify.com/track/6H0dvZoFJCMmai10qAwTpv?si=09bd163392bf4c38
-                  </code>
-                </div> --%>
               </div>
             </div>
             <div class="flex items-start gap-3">

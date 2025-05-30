@@ -134,8 +134,9 @@ def render(assigns) do
           </div>
         </div>
 
-        <!-- Player -->
-        <div id="spotify-player" data={@access_token} phx-hook="SpotifyPlayer" class="bg-[#1E293B] rounded-lg p-4 md:p-6">
+        <!-- Device ID / Player -->
+        <!-- This container required so that the SpotifyPlayer hook & event-handler can set the SpotifyPlayer device_ID into the socket state -->
+        <div id="spotify-player" data={@access_token} phx-hook="SpotifyPlayer" class="hidden bg-[#1E293B] rounded-lg p-4 md:p-6">
           <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
             <button
               id="togglePlay"

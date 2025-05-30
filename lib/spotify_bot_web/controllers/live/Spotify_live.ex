@@ -89,6 +89,7 @@ def render(assigns) do
             </button>
             <button
               phx-click="start-timer"
+              disabled={@track_uri == nil}
               class="bg-[#383737] h-20 px-6 py-4 rounded-lg sm:text-2xl md:text-3xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
             >
               <i class="fa-solid fa-play mr-2"></i> Start Bot
@@ -193,12 +194,12 @@ end
     case params["code"] do
       nil ->
         Logger.info(":code is nil ❌")
-        socket = assign(socket, code: nil, state: nil, access_token: nil, expires_in: nil, device_id: nil, track_name: nil, stream_count: 0, stream_url: nil, stream_status: "Idle", stream_time: nil)
+        socket = assign(socket, code: nil, state: nil, access_token: nil, expires_in: nil, device_id: nil, track_uri: nil, track_name: nil, stream_count: 0, stream_url: nil, stream_status: "Idle", stream_time: nil)
         {:noreply, socket}
 
       _ ->
         Logger.info(":code in socket ✅")
-        socket = assign(socket, code: params["code"], state: params["state"], access_token: nil, expires_in: nil, device_id: nil, track_name: nil, stream_count: 0, stream_url: nil, stream_status: "Idle", stream_time: nil)
+        socket = assign(socket, code: params["code"], state: params["state"], access_token: nil, expires_in: nil, device_id: nil, track_uri: nil, track_name: nil, stream_count: 0, stream_url: nil, stream_status: "Idle", stream_time: nil)
 
         GenServer.cast(self(), :fetch_token)
 

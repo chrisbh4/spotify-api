@@ -96,6 +96,7 @@ def render(assigns) do
             </button>
             <button
               phx-click="kill-timer"
+              disabled={@stream_status == "Idle" || @stream_status == "Loading..."}
               class="bg-[#383737] h-20 px-6 py-4 rounded-lg sm:text-2xl md:text-3xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
             >
               <i class="fas fa-stop mr-2"></i> Stop Bot

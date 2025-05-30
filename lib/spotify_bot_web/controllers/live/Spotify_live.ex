@@ -23,6 +23,37 @@ def render(assigns) do
           <p class="text-lg md:text-2xl text-gray-400">Automate your Spotify streaming with ease</p>
         </div>
 
+        <!-- Instructions -->
+        <div class="bg-[#1E293B] rounded-lg p-4 md:p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl md:text-2xl font-semibold">How to Use</h2>
+            <button
+              phx-click="toggle-instructions"
+              class="text-gray-400 hover:text-white transition-colors"
+            >
+              <i class="fas fa-chevron-down"></i>
+            </button>
+          </div>
+          <div class="space-y-3 text-gray-300">
+            <div class="flex items-start gap-3">
+              <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">1</div>
+              <p class="text-sm md:text-base">Click the <span class="font-semibold text-white">Auth</span> button to authenticate with your Spotify account.</p>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">2</div>
+              <p class="text-sm md:text-base">Paste a Spotify song URL (e.g., https://open.spotify.com/track/...) into the input field and click <span class="font-semibold text-white">Add Song to Bot</span>.</p>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">3</div>
+              <p class="text-sm md:text-base">Click <span class="font-semibold text-white">Start Bot</span> to begin automated streaming. The bot will continuously play the selected track.</p>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">4</div>
+              <p class="text-sm md:text-base">Monitor the status panel for stream count, current track, and token expiration. Click <span class="font-semibold text-white">Stop Bot</span> to end streaming.</p>
+            </div>
+          </div>
+        </div>
+
         <!-- URL Input -->
         <div class="bg-[#1E293B] rounded-lg p-4 md:p-6">
           <form phx-submit="add-song-url" class="flex flex-col md:flex-row items-center gap-4">
@@ -112,6 +143,7 @@ def render(assigns) do
             </button>
           </div>
         </div>
+
       </div>
     </div>
   """
@@ -149,7 +181,7 @@ end
     if connected?(socket) do
       :timer.send_interval(1000, self(), :tick)
     end
-    {:ok, assign(socket, countdown_time: 0)}
+    {:ok, assign(socket, countdown_time: 0, show_instructions: true)}
   end
 
  def handle_params(params, _uri, socket) do
@@ -628,6 +660,10 @@ end
       [_, track_id] -> "https://api.spotify.com/v1/tracks/#{track_id}"
       nil -> nil
     end
+  end
+
+  def handle_event("toggle-instructions", _params, socket) do
+    {:noreply, assign(socket, show_instructions: !socket.assigns.show_instructions)}
   end
 
 end

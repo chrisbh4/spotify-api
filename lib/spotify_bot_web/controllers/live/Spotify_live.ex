@@ -26,7 +26,7 @@ def render(assigns) do
         <!-- Instructions -->
         <div class="bg-[#1E293B] rounded-lg p-4 md:p-6">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl md:text-2xl font-semibold">How to Use</h2>
+            <h2 class="text-4xl md:text-4xl font-semibold">How to Use</h2>
             <button
               phx-click="toggle-instructions"
               class="text-gray-400 hover:text-white transition-colors"
@@ -40,15 +40,15 @@ def render(assigns) do
           ]}>
             <div class="flex items-start gap-3">
               <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">1</div>
-              <p class="text-sm md:text-base">Click the <span class="font-semibold text-white">Auth</span> button to authenticate with your Spotify account.</p>
+              <p class="sm:text-2xl md:text-2xl">Click the <span class="font-semibold text-white">Auth</span> button to authenticate with your Spotify account.</p>
             </div>
             <div class="flex items-start gap-3">
               <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">2</div>
-              <div class="text-sm md:text-base">
+              <div class="sm:text-2xl md:text-2xl">
                 <p>Paste a Spotify song URL into the input field and click <span class="font-semibold text-white">Add Song to Bot</span>.</p>
                 <%!-- <div class="mt-2 p-3 bg-[#383737] rounded-lg">
                   <p class="text-gray-400 text-xs mb-1">Test URL (click to copy):</p>
-                  <code class="text-xs md:text-sm cursor-pointer" onclick="navigator.clipboard.writeText(this.textContent)" title="Click to copy">
+                  <code class="text-xs md:sm:text-2xl cursor-pointer" onclick="navigator.clipboard.writeText(this.textContent)" title="Click to copy">
                     https://open.spotify.com/track/6H0dvZoFJCMmai10qAwTpv?si=09bd163392bf4c38
                   </code>
                 </div> --%>
@@ -56,11 +56,11 @@ def render(assigns) do
             </div>
             <div class="flex items-start gap-3">
               <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">3</div>
-              <p class="text-sm md:text-base">Click <span class="font-semibold text-white">Start Bot</span> to begin automated streaming. The bot will continuously play the selected track.</p>
+              <p class="sm:text-2xl md:text-2xl">Click <span class="font-semibold text-white">Start Bot</span> to begin automated streaming. The bot will continuously play the selected track.</p>
             </div>
             <div class="flex items-start gap-3">
               <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">4</div>
-              <p class="text-sm md:text-base">Monitor the status panel for stream count, current track, and token expiration. Click <span class="font-semibold text-white">Stop Bot</span> to end streaming.</p>
+              <p class="sm:text-2xl md:text-2xl">Monitor the status panel for stream count, current track, and token expiration. Click <span class="font-semibold text-white">Stop Bot</span> to end streaming.</p>
             </div>
           </div>
         </div>
@@ -221,7 +221,7 @@ end
       IO.inspect(socket.assigns.show_instructions)
     {:noreply, assign(socket, show_instructions: !socket.assigns.show_instructions)}
   end
-  
+
   def handle_event("set-device-id", %{"device_id" => device_id}, socket) do
     Logger.info("Device Event triggered")
     IO.inspect(device_id, label: "Device ID")

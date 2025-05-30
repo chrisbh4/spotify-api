@@ -31,17 +31,28 @@ def render(assigns) do
               phx-click="toggle-instructions"
               class="text-gray-400 hover:text-white transition-colors"
             >
-              <i class="fas fa-chevron-down"></i>
+              <%= if @show_instructions, do: "Hide", else: "Open" %>
+              <i class={"fas #{if @show_instructions, do: "fa-chevron-up", else: "fa-chevron-down"}"}></i>
             </button>
           </div>
-          <div class="space-y-3 text-gray-300">
+          <div class={[
+            "space-y-3 text-gray-300 #{if !@show_instructions, do: "hidden"}"
+          ]}>
             <div class="flex items-start gap-3">
               <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">1</div>
               <p class="text-sm md:text-base">Click the <span class="font-semibold text-white">Auth</span> button to authenticate with your Spotify account.</p>
             </div>
             <div class="flex items-start gap-3">
               <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">2</div>
-              <p class="text-sm md:text-base">Paste a Spotify song URL (e.g., https://open.spotify.com/track/...) into the input field and click <span class="font-semibold text-white">Add Song to Bot</span>.</p>
+              <div class="text-sm md:text-base">
+                <p>Paste a Spotify song URL into the input field and click <span class="font-semibold text-white">Add Song to Bot</span>.</p>
+                <%!-- <div class="mt-2 p-3 bg-[#383737] rounded-lg">
+                  <p class="text-gray-400 text-xs mb-1">Test URL (click to copy):</p>
+                  <code class="text-xs md:text-sm cursor-pointer" onclick="navigator.clipboard.writeText(this.textContent)" title="Click to copy">
+                    https://open.spotify.com/track/6H0dvZoFJCMmai10qAwTpv?si=09bd163392bf4c38
+                  </code>
+                </div> --%>
+              </div>
             </div>
             <div class="flex items-start gap-3">
               <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">3</div>
@@ -206,6 +217,11 @@ end
     {:noreply, socket}
   end
 
+  def handle_event("toggle-instructions", _params, socket) do
+      IO.inspect(socket.assigns.show_instructions)
+    {:noreply, assign(socket, show_instructions: !socket.assigns.show_instructions)}
+  end
+  
   def handle_event("set-device-id", %{"device_id" => device_id}, socket) do
     Logger.info("Device Event triggered")
     IO.inspect(device_id, label: "Device ID")
@@ -506,6 +522,7 @@ end
         {:noreply, assign(socket, stream_url: nil, track_name: nil)}
 
       api_url ->
+        Logger.info("URL format succesful ✅ ")
         headers = [
           {"Authorization", "Bearer #{socket.assigns.access_token}"},
           {"Content-Type", "application/json"}
@@ -662,8 +679,5 @@ end
     end
   end
 
-  def handle_event("toggle-instructions", _params, socket) do
-    {:noreply, assign(socket, show_instructions: !socket.assigns.show_instructions)}
-  end
 
 end

@@ -226,10 +226,10 @@ end
     # * Figure out the diffeence between the 2 url variables
     # url = "https://accounts.spotify.com/authorize?"
     url = "https://accounts.spotify.com/authorize/?"
-    # redirect_uri = "https://spotify-api.fly.dev"
-
+    # Production URI
+    redirect_uri = "https://spotify-api.fly.dev"
     # Localhost redirect_uri
-    redirect_uri = "http://localhost:8080"
+    # redirect_uri = "http://localhost:8080"
 
     # scope = "user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state streaming user-read-currently-playing"
     scope = "user-read-email user-read-private streaming user-read-currently-playing"
@@ -406,9 +406,10 @@ end
 
   def fetch_token(socket) do
     url = "https://accounts.spotify.com/api/token"
-    # body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=https://spotify-api.fly.dev"
-    # Localhost config
-    body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:8080"
+    # Production body
+    body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=https://spotify-api.fly.dev"
+    # Localhost body
+    # body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:8080"
     headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
     res = HTTPoison.post(url, body, headers)
 

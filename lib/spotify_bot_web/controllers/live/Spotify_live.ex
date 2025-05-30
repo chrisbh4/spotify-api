@@ -30,7 +30,7 @@ def render(assigns) do
               id="song-url"
               name="url"
               type="text"
-              placeholder={@url}
+              placeholder={"https://open.spotify.com/track/..."}
               class="w-full md:flex-1 bg-transparent sm:text-xl md:text-xl text-gray-200 placeholder-gray-500 focus:outline-none p-3 rounded-lg border border-gray-700"
             />
             <button
@@ -85,7 +85,7 @@ def render(assigns) do
             <div class="space-y-3">
               <p><span class="text-gray-400">Auth Token:</span> <%= if @access_token, do: "✅", else: "❌" %></p>
               <p><span class="text-gray-400">Device ID:</span> <%= if @device_id !== nil, do: "Loaded ✅", else: "❌" %></p>
-              <p><span class="text-gray-400">Song Data:</span> <%= if @url != "https://api.spotify.com/v1/artists/...", do: " Loaded ✅", else: "❌" %></p>
+              <p><span class="text-gray-400">Song Data:</span> <%= if @stream_url != nil, do: " Loaded ✅", else: "❌" %></p>
             </div>
             <div class="space-y-3">
               <p><span class="text-gray-400">Current Track:</span><%= if @track_name !== nil, do: @track_name, else: "Not Playing" %></p>
@@ -156,14 +156,12 @@ end
     case params["code"] do
       nil ->
         Logger.info(":code is nil ❌")
-        # Change URL socket state to stream_url
-        socket = assign(socket, code: nil, state: nil, access_token: nil, expires_in: nil, device_id: nil, track_name: nil, stream_count: 0, url: "https://api.spotify.com/v1/artists/...", stream_status: "Idle", stream_time: nil)
+        socket = assign(socket, code: nil, state: nil, access_token: nil, expires_in: nil, device_id: nil, track_name: nil, stream_count: 0, stream_url: nil, stream_status: "Idle", stream_time: nil)
         {:noreply, socket}
 
       _ ->
         Logger.info(":code in socket ✅")
-        # Is assigning URL: to the default string fucking it up?
-        socket = assign(socket, code: params["code"], state: params["state"], access_token: nil, expires_in: nil, device_id: nil, track_name: nil, stream_count: 0, url: "https://api.spotify.com/v1/artists/...", stream_status: "Idle", stream_time: nil)
+        socket = assign(socket, code: params["code"], state: params["state"], access_token: nil, expires_in: nil, device_id: nil, track_name: nil, stream_count: 0, stream_url: nil, stream_status: "Idle", stream_time: nil)
 
         GenServer.cast(self(), :fetch_token)
 
@@ -182,7 +180,6 @@ end
     {:noreply, assign(socket, :device_id, device_id)}
   end
 
-  # Disable The stream but test if the count stays after the loop happens again
   def handle_event("start-timer", _params, socket) do
     socket = assign(socket, :stream_status, "Loading...")
     start_timer()
@@ -212,7 +209,7 @@ end
   3. Updates LiveView with track name
   """
   def handle_event("add-song-url", %{"url" => url}, socket) do
-    with socket <- assign(socket, :url, url),
+    with socket <- assign(socket, :stream_url, url),
          {:noreply, updated_socket} <- fetch_track_data(socket, url) do
       {:noreply, updated_socket}
     end
@@ -229,8 +226,11 @@ end
     # * Figure out the diffeence between the 2 url variables
     # url = "https://accounts.spotify.com/authorize?"
     url = "https://accounts.spotify.com/authorize/?"
-    redirect_uri = "https://spotify-api.fly.dev"
-    # localhost_redirect_uri = "http://localhost:8080"
+    # redirect_uri = "https://spotify-api.fly.dev"
+
+    # Localhost redirect_uri
+    redirect_uri = "http://localhost:8080"
+
     # scope = "user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state streaming user-read-currently-playing"
     scope = "user-read-email user-read-private streaming user-read-currently-playing"
     state = for _ <- 1..16, into: "", do: <<Enum.random('0123456789abcdef')>>
@@ -351,25 +351,6 @@ end
     end
   end
 
-  def handle_event("get-currently-playing", _params, socket) do
-    url = "https://api.spotify.com/v1/me/player/currently-playing"
-    res = HTTPoison.get(url, [{"Authorization", "Bearer #{socket.assigns.access_token}"}])
-    case res do
-      {:ok , %{status_code: 200, body: body}} ->
-        IO.inspect(body)
-        {:noreply, socket}
-
-      {:ok, %{status_code: status_code, body: body}} ->
-        Logger.info("#{status_code}")
-        IO.inspect(body)
-        {:noreply, socket}
-
-      {:error, error} ->
-        Logger.info(error)
-        {:noreply, socket}
-    end
-  end
-
   # def handle_info({:timeout, _data, :fetch_token}, socket) do
   #   token = fetch_token(socket)
   #   case token do
@@ -425,8 +406,9 @@ end
 
   def fetch_token(socket) do
     url = "https://accounts.spotify.com/api/token"
-    body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=https://spotify-api.fly.dev"
-    # localhost_body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:8080"
+    # body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=https://spotify-api.fly.dev"
+    # Localhost config
+    body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:8080"
     headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
     res = HTTPoison.post(url, body, headers)
 
@@ -484,45 +466,39 @@ end
   }
   ```
   """
-  def fetch_track_data(socket, _url) do
-    url = "https://api.spotify.com/v1/tracks/11dFghVXANMlKmJXsNCbNl"
-    headers = [
-      {"Authorization", "Bearer #{socket.assigns.access_token}"},
-      {"Content-Type", "application/json"}
-    ]
+  #* Error handling: figure out how to prevent Song Data logic from loading true
+  def fetch_track_data(socket, url) do
+    case url_translator(url) do
+      nil ->
+        Logger.error("Invalid Spotify URL format")
+        {:noreply, assign(socket, stream_url: nil, track_name: nil)}
 
-    case HTTPoison.get(url, headers) do
-      {:ok, %{status_code: 200, body: body}} ->
-        track_data = Jason.decode!(body)
-        {:noreply, assign(socket, track_name: track_data["name"])}
+      api_url ->
+        headers = [
+          {"Authorization", "Bearer #{socket.assigns.access_token}"},
+          {"Content-Type", "application/json"}
+        ]
 
-      {:error, error} ->
-        Logger.error("Failed to fetch song data: #{inspect(error)}")
-        {:noreply, socket}
+        case HTTPoison.get(api_url, headers) do
+          {:ok, %{status_code: 200, body: body}} ->
+            track_data = Jason.decode!(body)
+            {:noreply, assign(socket, track_name: track_data["name"], track_uri: track_data["uri"])}
+
+          {:error, error} ->
+            Logger.error("Failed to fetch song data: #{inspect(error)}")
+            {:noreply, socket}
+        end
     end
   end
 
   def play_song(socket) do
     url = "https://api.spotify.com/v1/me/player/play?device_id=#{socket.assigns.device_id}"
     headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}, {"Content-Type", "application/json"}]
-    # "context_uri": socket.assigns.url,
-    body = '{
-      "context_uri": "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
-      "offset": {
-          "position": 4
-      },
-      "position_ms": 0
-    }'
-    # body = Jason.encode!(%{
-    #   context_uri: "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
-    #   # context_uri: socket.assigns.url,
-    #   offset: %{position: 4},
-    #   position_ms: 0
-    # })
+    body = Jason.encode!(%{
+      uris: [socket.assigns.track_uri],
+      position_ms: 0
+    })
 
-    # * I'll have to fetch the data first to get the Track info and then plug it into the URL which will help for USer input when they have a song data to load up
-
-    # Figure out how to get the current stream time into the socket state
     res = HTTPoison.put(url, body, headers)
     case res do
       {:ok , %{status_code: 204}} ->
@@ -633,6 +609,25 @@ end
     remaining_seconds = rem(seconds, 60)
 
     "#{String.pad_leading(Integer.to_string(hours), 2, "0")}:#{String.pad_leading(Integer.to_string(minutes), 2, "0")}:#{String.pad_leading(Integer.to_string(remaining_seconds), 2, "0")}"
+  end
+
+  @doc """
+  Translates a Spotify web URL to an API URL.
+  Extracts the track ID and constructs the API endpoint URL.
+
+  ## Examples
+      iex> url_translator("https://open.spotify.com/track/3l4eYYvCzqd2Q37KkOBZGC?si=c8df893b37a94714")
+      "https://api.spotify.com/v1/tracks/3l4eYYvCzqd2Q37KkOBZGC"
+
+      iex> url_translator("https://open.spotify.com/track/3l4eYYvCzqd2Q37KkOBZGC")
+      "https://api.spotify.com/v1/tracks/3l4eYYvCzqd2Q37KkOBZGC"
+  """
+  def url_translator(url) do
+    # Extract track ID using regex
+    case Regex.run(~r/track\/([a-zA-Z0-9]+)/, url) do
+      [_, track_id] -> "https://api.spotify.com/v1/tracks/#{track_id}"
+      nil -> nil
+    end
   end
 
 end

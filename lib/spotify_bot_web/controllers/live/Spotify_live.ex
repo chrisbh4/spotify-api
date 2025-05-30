@@ -71,6 +71,7 @@ def render(assigns) do
             />
             <button
               type="submit"
+              disabled={!@access_token}
               class="w-full md:w-auto bg-[#383737] h-20 md:h-auto sm:py-8 md:px-6 md:py-3 rounded-lg sm:text-xl md:text-xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
             >
               Add Song to Bot
@@ -89,7 +90,7 @@ def render(assigns) do
             </button>
             <button
               phx-click="start-timer"
-              disabled={@track_uri == nil}
+              disabled={@track_uri == nil || @track_name == nil}
               class="bg-[#383737] h-20 px-6 py-4 rounded-lg sm:text-2xl md:text-3xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
             >
               <i class="fa-solid fa-play mr-2"></i> Start Bot

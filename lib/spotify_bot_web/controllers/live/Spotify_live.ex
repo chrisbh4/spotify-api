@@ -29,7 +29,7 @@ def render(assigns) do
             <h2 class="text-4xl md:text-4xl font-semibold">How to Use</h2>
             <button
               phx-click="toggle-instructions"
-              class="w-auto md:h-auto bg-[#383737] px-4 md:px-6 md:py-3 rounded-lg text-lg md:text-xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+              class="w-auto md:h-auto bg-[#383737] px-4 md:px-6 md:py-3 rounded-lg text-lg md:text-xl font-semibold transition transform border-black hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
             >
               <%= if @show_instructions, do: "Hide", else: "Open" %>
               <i class={"fas #{if @show_instructions, do: "fa-chevron-up", else: "fa-chevron-down"}"}></i>
@@ -72,7 +72,7 @@ def render(assigns) do
             <button
               type="submit"
               disabled={!@access_token}
-              class="w-full md:w-auto bg-[#383737] h-20 md:h-auto sm:py-8 md:px-6 md:py-3 rounded-lg sm:text-xl md:text-xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+              class="w-full md:w-auto bg-[#383737] h-20 md:h-auto sm:py-8 md:px-6 md:py-3 rounded-lg sm:text-xl md:text-xl font-semibold transition transform border-black hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
             >
               Add Song to Bot
             </button>
@@ -84,21 +84,21 @@ def render(assigns) do
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button
               phx-click="auth-flow"
-              class="bg-[#383737] h-20 px-6 py-4 rounded-lg sm:text-2xl md:text-3xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+              class="bg-[#383737] h-20 px-6 py-4 rounded-lg sm:text-2xl md:text-3xl font-semibold transition transform border-black hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
             >
               <i class="fa-solid fa-key mr-2"></i> Auth
             </button>
             <button
               phx-click="start-timer"
               disabled={@track_uri == nil || @track_name == nil}
-              class="bg-[#383737] h-20 px-6 py-4 rounded-lg sm:text-2xl md:text-3xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+              class="bg-[#383737] h-20 px-6 py-4 rounded-lg sm:text-2xl md:text-3xl font-semibold transition transform border-black hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
             >
               <i class="fa-solid fa-play mr-2"></i> Start Bot
             </button>
             <button
               phx-click="kill-timer"
               disabled={@stream_status == "Idle" || @stream_status == "Loading..."}
-              class="bg-[#383737] h-20 px-6 py-4 rounded-lg sm:text-2xl md:text-3xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+              class="bg-[#383737] h-20 px-6 py-4 rounded-lg sm:text-2xl md:text-3xl font-semibold transition transform border-black hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
             >
               <i class="fas fa-stop mr-2"></i> Stop Bot
             </button>

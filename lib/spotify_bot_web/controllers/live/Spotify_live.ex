@@ -127,7 +127,7 @@ def render(assigns) do
               <p><span class="text-gray-400">Song Data:</span> <%= if @stream_url != nil, do: " Loaded ✅", else: "❌" %></p>
             </div>
             <div class="space-y-3">
-              <p><span class="text-gray-400">Current Track:</span><%= if @track_name !== nil, do: @track_name, else: "Not Playing" %></p>
+              <p><span class="text-gray-400">Current Track:</span><%= if @track_name !== nil, do: @track_name, else: "" %></p>
               <p><span class="text-gray-400">Stream Count:</span> <%= @stream_count %></p>
               <p><span class="text-gray-400">Token Expires in:</span> <%= if @expires_in !== nil, do: format_time(@expires_in), else: "00:00:00" %></p>
             </div>

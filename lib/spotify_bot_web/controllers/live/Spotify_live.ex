@@ -29,7 +29,7 @@ def render(assigns) do
             <h2 class="text-4xl md:text-4xl font-semibold">How to Use</h2>
             <button
               phx-click="toggle-instructions"
-              class="text-gray-400 hover:text-white transition-colors"
+              class="w-auto md:h-auto bg-[#383737] px-4 md:px-6 md:py-3 rounded-lg text-lg md:text-xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
             >
               <%= if @show_instructions, do: "Hide", else: "Open" %>
               <i class={"fas #{if @show_instructions, do: "fa-chevron-up", else: "fa-chevron-down"}"}></i>
@@ -212,7 +212,6 @@ end
   end
 
   def handle_event("toggle-instructions", _params, socket) do
-      IO.inspect(socket.assigns.show_instructions)
     {:noreply, assign(socket, show_instructions: !socket.assigns.show_instructions)}
   end
 

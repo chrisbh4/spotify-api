@@ -30,7 +30,7 @@ def render(assigns) do
               id="song-url"
               name="url"
               type="text"
-              placeholder={@stream_url}
+              placeholder={"https://open.spotify.com/track/..."}
               class="w-full md:flex-1 bg-transparent sm:text-xl md:text-xl text-gray-200 placeholder-gray-500 focus:outline-none p-3 rounded-lg border border-gray-700"
             />
             <button
@@ -85,7 +85,7 @@ def render(assigns) do
             <div class="space-y-3">
               <p><span class="text-gray-400">Auth Token:</span> <%= if @access_token, do: "✅", else: "❌" %></p>
               <p><span class="text-gray-400">Device ID:</span> <%= if @device_id !== nil, do: "Loaded ✅", else: "❌" %></p>
-              <p><span class="text-gray-400">Song Data:</span> <%= if @stream_url != "https://api.spotify.com/v1/artists/...", do: " Loaded ✅", else: "❌" %></p>
+              <p><span class="text-gray-400">Song Data:</span> <%= if @stream_url != nil, do: " Loaded ✅", else: "❌" %></p>
             </div>
             <div class="space-y-3">
               <p><span class="text-gray-400">Current Track:</span><%= if @track_name !== nil, do: @track_name, else: "Not Playing" %></p>
@@ -156,12 +156,12 @@ end
     case params["code"] do
       nil ->
         Logger.info(":code is nil ❌")
-        socket = assign(socket, code: nil, state: nil, access_token: nil, expires_in: nil, device_id: nil, track_name: nil, stream_count: 0, stream_url: "https://api.spotify.com/v1/artists/...", stream_status: "Idle", stream_time: nil)
+        socket = assign(socket, code: nil, state: nil, access_token: nil, expires_in: nil, device_id: nil, track_name: nil, stream_count: 0, stream_url: nil, stream_status: "Idle", stream_time: nil)
         {:noreply, socket}
 
       _ ->
         Logger.info(":code in socket ✅")
-        socket = assign(socket, code: params["code"], state: params["state"], access_token: nil, expires_in: nil, device_id: nil, track_name: nil, stream_count: 0, stream_url: "https://api.spotify.com/v1/artists/...", stream_status: "Idle", stream_time: nil)
+        socket = assign(socket, code: params["code"], state: params["state"], access_token: nil, expires_in: nil, device_id: nil, track_name: nil, stream_count: 0, stream_url: nil, stream_status: "Idle", stream_time: nil)
 
         GenServer.cast(self(), :fetch_token)
 
@@ -471,7 +471,7 @@ end
     case url_translator(url) do
       nil ->
         Logger.error("Invalid Spotify URL format")
-        {:noreply, socket}
+        {:noreply, assign(socket, stream_url: nil, track_name: nil)}
 
       api_url ->
         headers = [

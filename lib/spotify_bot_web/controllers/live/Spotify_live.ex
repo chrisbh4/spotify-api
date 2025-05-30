@@ -23,6 +23,42 @@ def render(assigns) do
           <p class="text-lg md:text-2xl text-gray-400">Automate your Spotify streaming with ease</p>
         </div>
 
+        <!-- Instructions -->
+        <div class="bg-[#1E293B] rounded-lg p-4 md:p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-4xl md:text-4xl font-semibold">How to Use</h2>
+            <button
+              phx-click="toggle-instructions"
+              class="w-auto md:h-auto bg-[#383737] px-4 md:px-6 md:py-3 rounded-lg text-lg md:text-xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+            >
+              <%= if @show_instructions, do: "Hide", else: "Open" %>
+              <i class={"fas #{if @show_instructions, do: "fa-chevron-up", else: "fa-chevron-down"}"}></i>
+            </button>
+          </div>
+          <div class={[
+            "space-y-3 text-gray-300 #{if !@show_instructions, do: "hidden"}"
+          ]}>
+            <div class="flex items-start gap-3">
+              <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">1</div>
+              <p class="sm:text-2xl md:text-2xl">Click the <span class="font-semibold text-white">Auth</span> button to authenticate with your Spotify account.</p>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">2</div>
+              <div class="sm:text-2xl md:text-2xl">
+                <p>Paste a Spotify song URL into the input field and click <span class="font-semibold text-white">Add Song to Bot</span>.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">3</div>
+              <p class="sm:text-2xl md:text-2xl">Click <span class="font-semibold text-white">Start Bot</span> to begin automated streaming. The bot will continuously play the selected track.</p>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">4</div>
+              <p class="sm:text-2xl md:text-2xl">Monitor the status panel for stream count, current track, and token expiration. Click <span class="font-semibold text-white">Stop Bot</span> to end streaming.</p>
+            </div>
+          </div>
+        </div>
+
         <!-- URL Input -->
         <div class="bg-[#1E293B] rounded-lg p-4 md:p-6">
           <form phx-submit="add-song-url" class="flex flex-col md:flex-row items-center gap-4">
@@ -35,6 +71,7 @@ def render(assigns) do
             />
             <button
               type="submit"
+              disabled={!@access_token}
               class="w-full md:w-auto bg-[#383737] h-20 md:h-auto sm:py-8 md:px-6 md:py-3 rounded-lg sm:text-xl md:text-xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
             >
               Add Song to Bot
@@ -53,12 +90,14 @@ def render(assigns) do
             </button>
             <button
               phx-click="start-timer"
+              disabled={@track_uri == nil || @track_name == nil}
               class="bg-[#383737] h-20 px-6 py-4 rounded-lg sm:text-2xl md:text-3xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
             >
               <i class="fa-solid fa-play mr-2"></i> Start Bot
             </button>
             <button
               phx-click="kill-timer"
+              disabled={@stream_status == "Idle" || @stream_status == "Loading..."}
               class="bg-[#383737] h-20 px-6 py-4 rounded-lg sm:text-2xl md:text-3xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
             >
               <i class="fas fa-stop mr-2"></i> Stop Bot
@@ -112,6 +151,7 @@ def render(assigns) do
             </button>
           </div>
         </div>
+
       </div>
     </div>
   """
@@ -149,19 +189,19 @@ end
     if connected?(socket) do
       :timer.send_interval(1000, self(), :tick)
     end
-    {:ok, assign(socket, countdown_time: 0)}
+    {:ok, assign(socket, countdown_time: 0, show_instructions: true)}
   end
 
  def handle_params(params, _uri, socket) do
     case params["code"] do
       nil ->
         Logger.info(":code is nil ❌")
-        socket = assign(socket, code: nil, state: nil, access_token: nil, expires_in: nil, device_id: nil, track_name: nil, stream_count: 0, stream_url: nil, stream_status: "Idle", stream_time: nil)
+        socket = assign(socket, code: nil, state: nil, access_token: nil, expires_in: nil, device_id: nil, track_uri: nil, track_name: nil, stream_count: 0, stream_url: nil, stream_status: "Idle", stream_time: nil)
         {:noreply, socket}
 
       _ ->
         Logger.info(":code in socket ✅")
-        socket = assign(socket, code: params["code"], state: params["state"], access_token: nil, expires_in: nil, device_id: nil, track_name: nil, stream_count: 0, stream_url: nil, stream_status: "Idle", stream_time: nil)
+        socket = assign(socket, code: params["code"], state: params["state"], access_token: nil, expires_in: nil, device_id: nil, track_uri: nil, track_name: nil, stream_count: 0, stream_url: nil, stream_status: "Idle", stream_time: nil)
 
         GenServer.cast(self(), :fetch_token)
 
@@ -172,6 +212,10 @@ end
   def handle_cast(:fetch_token, socket) do
     {_, socket} = fetch_token(socket)
     {:noreply, socket}
+  end
+
+  def handle_event("toggle-instructions", _params, socket) do
+    {:noreply, assign(socket, show_instructions: !socket.assigns.show_instructions)}
   end
 
   def handle_event("set-device-id", %{"device_id" => device_id}, socket) do
@@ -226,10 +270,7 @@ end
     # * Figure out the diffeence between the 2 url variables
     # url = "https://accounts.spotify.com/authorize?"
     url = "https://accounts.spotify.com/authorize/?"
-    # Production URI
-    redirect_uri = "https://spotify-api.fly.dev"
-    # Localhost redirect_uri
-    # redirect_uri = "http://localhost:8080"
+    redirect_uri = System.get_env("REDIRECT_URI") || "http://localhost:8080"
 
     # scope = "user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state streaming user-read-currently-playing"
     scope = "user-read-email user-read-private streaming user-read-currently-playing"
@@ -406,10 +447,8 @@ end
 
   def fetch_token(socket) do
     url = "https://accounts.spotify.com/api/token"
-    # Production body
-    body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=https://spotify-api.fly.dev"
-    # Localhost body
-    # body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:8080"
+    redirect_uri = System.get_env("REDIRECT_URI") || "http://localhost:8080"
+    body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=#{redirect_uri}"
     headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
     res = HTTPoison.post(url, body, headers)
 
@@ -475,6 +514,7 @@ end
         {:noreply, assign(socket, stream_url: nil, track_name: nil)}
 
       api_url ->
+        Logger.info("URL format succesful ✅ ")
         headers = [
           {"Authorization", "Bearer #{socket.assigns.access_token}"},
           {"Content-Type", "application/json"}
@@ -630,5 +670,6 @@ end
       nil -> nil
     end
   end
+
 
 end

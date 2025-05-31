@@ -620,8 +620,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
     |> String.trim_trailing("=")
   end
 
-
-
   def format_time(seconds) do
     hours = div(seconds, 3600)
     minutes = div(rem(seconds, 3600), 60)

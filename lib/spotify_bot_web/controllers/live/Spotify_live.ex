@@ -1,6 +1,4 @@
 defmodule SpotifyBotWeb.SpotifyLive do
-  # alias ElixirLS.LanguageServer.Providers.FoldingRange.Token
-  # alias ElixirSense.Log
   use Phoenix.LiveView
   require Logger
 
@@ -119,7 +117,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
                 }"
               }><%= @stream_status %></span>
             </div>
-            <%!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-base md:text-3xl text-gray-300"> --%>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:text-xl md:text-3xl text-gray-300">
               <div class="space-y-3">
                 <p><span class="text-gray-400">Auth Token:</span> <%= if @access_token, do: "✅", else: "❌" %></p>
@@ -157,26 +154,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
       </div>
     """
   end
-
-  # * OLD UI for spotify Bot
-  # def render(assigns) do
-  #     ~H"""
-  #       <div class='flex justify-center w-full bg-red-500 '>
-  #       <h1>Spotify API access point </h1>
-  #       <button phx-click="auth-flow">Authentication Flow </button>
-  #       <button phx-click="start-timer">Start Timer </button>
-  #       <button phx-click="kill-timer">Stop Timer </button>
-  #       <button phx-click="play-music">Play song </button>
-  #       </div>
-  #       <h1>Spotify Web Playback SDK Quick Start</h1>
-  #       <script src="https://sdk.scdn.co/spotify-player.js"></script>
-  #       <div id="spotify-player" data={@access_token} phx-hook="SpotifyPlayer">
-  #         <script id="sdk-script"></script>
-  #         <button id="togglePlay">Toggle Play</button>
-  #         <button id="playSDK">Play</button>
-  #       </div>
-  #     """
-  #   end
 
   # Mount is called when the LiveView is first rendered
   # Here we set up:
@@ -297,15 +274,10 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
   # Authorization Code Flow: Single Grant token only this is why it is refreshing everytime
   def handle_event("auth-flow", _params, socket) do
-    # * Figure out the diffeence between the 2 url variables
-    # url = "https://accounts.spotify.com/authorize?"
     url = "https://accounts.spotify.com/authorize/?"
     redirect_uri = System.get_env("REDIRECT_URI") || "http://localhost:8080"
-
-    # scope = "user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state streaming user-read-currently-playing"
     scope = "user-read-email user-read-private streaming user-read-currently-playing"
     state = for _ <- 1..16, into: "", do: <<Enum.random(~c"0123456789abcdef")>>
-    # state = for _ <- 1..16, into: "", do: <<Enum.random("0123456789abcdef")>>
 
     query_params =
       [
@@ -322,8 +294,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
     case res do
       {:ok, %{status_code: 200, body: _body}} ->
         Logger.info("Auth successful ✅")
-        # json_data = Jason.decode!(body)
-        # IO.inspect(json_data)
         {:noreply, socket}
 
       {:ok, %{status_code: status_code, body: _body, request_url: request_url}} ->
@@ -378,7 +348,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
       {"Content-Type", "application/json"}
     ]
 
-    # offset: is the position of the song in the album in array format starting at 0
     body = ~c'{
       "context_uri": "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
       "offset": {
@@ -387,11 +356,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
       "position_ms": 0
     }'
 
-    # body = Jason.encode!(%{
-    #   context_uri: "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
-    #   offset: %{position: 4},
-    #   position_ms: 0
-    # })
 
     res = HTTPoison.put(url, body, headers)
 
@@ -444,16 +408,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
         {:noreply, socket}
     end
   end
-
-  # def handle_info({:timeout, _data, :fetch_token}, socket) do
-  #   token = fetch_token(socket)
-  #   case token do
-  #     {:noreply, socket} ->
-  #       Logger.info("Token & Timer ✅")
-  #       play_song_on_a_loop(socket)
-  #       {:noreply, socket}
-  #   end
-  # end
 
   def handle_info({:timeout, _data, :fetch_token}, socket) do
     Logger.info("Token & Timer ✅")
@@ -713,30 +667,7 @@ defmodule SpotifyBotWeb.SpotifyLive do
     |> String.trim_trailing("=")
   end
 
-  # Authorization Code Flow fetch token // Single Grant token only this is why it is refreshing everytime
-  #  def handle_event("fetch-token", _params, socket) do
-  #   url = "https://accounts.spotify.com/api/token"
-  #   # body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:4000"
-  #   body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=https://spotify-api.fly.dev"
-  #   headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
 
-  #   res = HTTPoison.post(url, body, headers)
-  #   case res do
-  #     {:ok , %{status_code: 200, body: body}} ->
-  #       Logger.info("Auth Token with Code fetched ✅")
-  #       json_data = Jason.decode!(body)
-  #       {:noreply, assign(socket, access_token: json_data["access_token"], expires_in: json_data["expires_in"], refresh_token: json_data["refresh_token"])}
-
-  #     {:ok, %{status_code: status_code, body: body}} ->
-  #       Logger.info(status_code: status_code)
-  #       Logger.info(body: body)
-  #       {:noreply, socket}
-
-  #     {:error, error} ->
-  #       Logger.info(error)
-  #       {:noreply, socket}
-  #     end
-  # end
 
   def format_time(seconds) do
     hours = div(seconds, 3600)

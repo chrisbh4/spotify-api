@@ -340,53 +340,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
     end
   end
 
-  def handle_event("play-music", _params, socket) do
-    url = "https://api.spotify.com/v1/me/player/play?device_id=#{socket.assigns.device_id}"
-
-    headers = [
-      {"Authorization", "Bearer #{socket.assigns.access_token}"},
-      {"Content-Type", "application/json"}
-    ]
-
-    body = ~c'{
-      "context_uri": "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
-      "offset": {
-          "position": 4
-      },
-      "position_ms": 0
-    }'
-
-
-    res = HTTPoison.put(url, body, headers)
-
-    case res do
-      {:ok, %{status_code: 204}} ->
-        Logger.info("Playback started ✅")
-
-        socket =
-          socket
-          |> assign(:stream_status, "Streaming")
-
-        {:noreply, socket}
-
-      {:ok, %{status_code: 401}} ->
-        Logger.info("Expired Token ❌")
-        Logger.info(status_code: 401)
-        refresh_token(socket)
-        {:noreply, socket}
-
-      {:ok, %{status_code: status_code, body: body}} ->
-        Logger.info("Playback failed ❌")
-        Logger.info(status_code: status_code)
-        IO.inspect(body)
-        {:noreply, socket}
-
-      {:error, error} ->
-        Logger.info(error)
-        {:noreply, socket}
-    end
-  end
-
   def handle_event("get-devices", _params, socket) do
     url = "https://api.spotify.com/v1/me/player/devices"
     res = HTTPoison.get(url, [{"Authorization", "Bearer #{socket.assigns.access_token}"}])

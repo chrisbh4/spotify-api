@@ -4,180 +4,179 @@ defmodule SpotifyBotWeb.SpotifyLive do
   use Phoenix.LiveView
   require Logger
 
-def render(assigns) do
-  ~H"""
-    <head>
-      <script src="https://cdn.tailwindcss.com"></script>
-      <script src="https://sdk.scdn.co/spotify-player.js"></script>
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    </head>
-    <div class="bg-[#0F172A] text-white min-h-screen p-4 md:p-8">
-      <div class="max-w-7xl mx-auto space-y-6">
-        <!-- Header -->
-        <div class="text-center space-y-4">
-          <h1 class="text-4xl md:text-7xl font-semibold flex items-center justify-center gap-3">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="h-10 md:h-16" alt="Spotify" />
-            <span class="hidden md:inline">Spotify Stream Bot</span>
-            <span class="md:hidden">Stream Bot</span>
-          </h1>
-          <p class="text-lg md:text-2xl text-gray-400">Automate your Spotify streaming with ease</p>
-        </div>
-
-        <!-- Instructions -->
-        <div class="bg-[#1E293B] rounded-lg p-4 md:p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-4xl md:text-4xl font-semibold">How to Use</h2>
-            <button
-              phx-click="toggle-instructions"
-              class="w-auto md:h-auto bg-[#383737] px-4 md:px-6 md:py-3 rounded-lg text-lg md:text-xl font-semibold transition transform border-black hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
-            >
-              <%= if @show_instructions, do: "Hide", else: "Open" %>
-              <i class={"fas #{if @show_instructions, do: "fa-chevron-up", else: "fa-chevron-down"}"}></i>
-            </button>
+  def render(assigns) do
+    ~H"""
+      <head>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://sdk.scdn.co/spotify-player.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+      </head>
+      <div class="bg-[#0F172A] text-white min-h-screen p-4 md:p-8">
+        <div class="max-w-7xl mx-auto space-y-6">
+          <!-- Header -->
+          <div class="text-center space-y-4">
+            <h1 class="text-4xl md:text-7xl font-semibold flex items-center justify-center gap-3">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" class="h-10 md:h-16" alt="Spotify" />
+              <span class="hidden md:inline">Spotify Stream Bot</span>
+              <span class="md:hidden">Stream Bot</span>
+            </h1>
+            <p class="text-lg md:text-2xl text-gray-400">Automate your Spotify streaming with ease</p>
           </div>
-          <div class={[
-            "space-y-3 text-gray-300 #{if !@show_instructions, do: "hidden"}"
-          ]}>
-            <div class="flex items-start gap-3">
-              <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">1</div>
-              <p class="sm:text-2xl md:text-2xl">Click the <span class="font-semibold text-white">Auth</span> button to authenticate with your Spotify account.</p>
+
+          <!-- Instructions -->
+          <div class="bg-[#1E293B] rounded-lg p-4 md:p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-4xl md:text-4xl font-semibold">How to Use</h2>
+              <button
+                phx-click="toggle-instructions"
+                class="w-auto md:h-auto bg-[#383737] px-4 md:px-6 md:py-3 rounded-lg text-lg md:text-xl font-semibold transition transform border-black hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+              >
+                <%= if @show_instructions, do: "Hide", else: "Open" %>
+                <i class={"fas #{if @show_instructions, do: "fa-chevron-up", else: "fa-chevron-down"}"}></i>
+              </button>
             </div>
-            <div class="flex items-start gap-3">
-              <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">2</div>
-              <div class="sm:text-2xl md:text-2xl">
-                <p>Paste a Spotify song URL into the input field and click <span class="font-semibold text-white">Add Song to Bot</span>.</p>
+            <div class={[
+              "space-y-3 text-gray-300 #{if !@show_instructions, do: "hidden"}"
+            ]}>
+              <div class="flex items-start gap-3">
+                <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">1</div>
+                <p class="sm:text-2xl md:text-2xl">Click the <span class="font-semibold text-white">Auth</span> button to authenticate with your Spotify account.</p>
+              </div>
+              <div class="flex items-start gap-3">
+                <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">2</div>
+                <div class="sm:text-2xl md:text-2xl">
+                  <p>Paste a Spotify song URL into the input field and click <span class="font-semibold text-white">Add Song to Bot</span>.</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3">
+                <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">3</div>
+                <p class="sm:text-2xl md:text-2xl">Click <span class="font-semibold text-white">Start Bot</span> to begin automated streaming. The bot will continuously play the selected track.</p>
+              </div>
+              <div class="flex items-start gap-3">
+                <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">4</div>
+                <p class="sm:text-2xl md:text-2xl">Monitor the status panel for stream count, current track, and token expiration. Click <span class="font-semibold text-white">Stop Bot</span> to end streaming.</p>
               </div>
             </div>
-            <div class="flex items-start gap-3">
-              <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">3</div>
-              <p class="sm:text-2xl md:text-2xl">Click <span class="font-semibold text-white">Start Bot</span> to begin automated streaming. The bot will continuously play the selected track.</p>
-            </div>
-            <div class="flex items-start gap-3">
-              <div class="flex-shrink-0 w-8 h-8 bg-[#383737] rounded-full flex items-center justify-center">4</div>
-              <p class="sm:text-2xl md:text-2xl">Monitor the status panel for stream count, current track, and token expiration. Click <span class="font-semibold text-white">Stop Bot</span> to end streaming.</p>
-            </div>
           </div>
-        </div>
 
-        <!-- URL Input -->
-        <div class="bg-[#1E293B] rounded-lg p-4 md:p-6">
-          <form phx-submit="add-song-url" class="flex flex-col md:flex-row items-center gap-4">
-            <input
-              id="song-url"
-              name="url"
-              type="text"
-              placeholder={"https://open.spotify.com/track/..."}
-              class="w-full md:flex-1 bg-transparent sm:text-xl md:text-xl text-gray-200 placeholder-gray-500 focus:outline-none p-3 rounded-lg border border-gray-700"
-            />
-            <button
-              type="submit"
-              disabled={!@access_token}
-              class="w-full md:w-auto bg-[#383737] h-20 md:h-auto sm:py-8 md:px-6 md:py-3 rounded-lg sm:text-xl md:text-xl font-semibold transition transform border-black hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
-            >
-              Add Song to Bot
-            </button>
-          </form>
-        </div>
-
-        <!-- Bot Controls -->
-        <div class="bg-[#1E293B] rounded-lg p-4 md:p-6">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button
-              phx-click="auth-flow"
-              class="bg-[#383737] h-20 px-6 py-4 rounded-lg sm:text-2xl md:text-3xl font-semibold transition transform border-black hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
-            >
-              <i class="fa-solid fa-key mr-2"></i> Auth
-            </button>
-            <button
-              phx-click="start-timer"
-              disabled={@track_uri == nil || @track_name == nil}
-              class="bg-[#383737] h-20 px-6 py-4 rounded-lg sm:text-2xl md:text-3xl font-semibold transition transform border-black hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
-            >
-              <i class="fa-solid fa-play mr-2"></i> Start Bot
-            </button>
-            <button
-              phx-click="kill-timer"
-              disabled={@stream_status == "Idle" || @stream_status == "Loading..."}
-              class="bg-[#383737] h-20 px-6 py-4 rounded-lg sm:text-2xl md:text-3xl font-semibold transition transform border-black hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
-            >
-              <i class="fas fa-stop mr-2"></i> Stop Bot
-            </button>
+          <!-- URL Input -->
+          <div class="bg-[#1E293B] rounded-lg p-4 md:p-6">
+            <form phx-submit="add-song-url" class="flex flex-col md:flex-row items-center gap-4">
+              <input
+                id="song-url"
+                name="url"
+                type="text"
+                placeholder={"https://open.spotify.com/track/..."}
+                class="w-full md:flex-1 bg-transparent sm:text-xl md:text-xl text-gray-200 placeholder-gray-500 focus:outline-none p-3 rounded-lg border border-gray-700"
+              />
+              <button
+                type="submit"
+                disabled={!@access_token}
+                class="w-full md:w-auto bg-[#383737] h-20 md:h-auto sm:py-8 md:px-6 md:py-3 rounded-lg sm:text-xl md:text-xl font-semibold transition transform border-black hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+              >
+                Add Song to Bot
+              </button>
+            </form>
           </div>
-        </div>
 
-        <!-- Status Panel -->
-        <div class="bg-[#1E293B] rounded-lg p-4 md:p-8">
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-            <span class="text-2xl md:text-3xl font-medium">Status</span>
-            <span class={
-              "text-2xl md:text-2xl px-4 md:px-8 py-2 rounded-full font-bold #{
-                cond do
-                  @stream_status == "Streaming" -> "bg-green-500"
-                  @stream_status == "Paused" -> "bg-red-400"
-                  true -> "bg-[#334155]"
-                end
-              }"
-            }><%= @stream_status %></span>
-          </div>
-          <%!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-base md:text-3xl text-gray-300"> --%>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:text-xl md:text-3xl text-gray-300">
-            <div class="space-y-3">
-              <p><span class="text-gray-400">Auth Token:</span> <%= if @access_token, do: "✅", else: "❌" %></p>
-              <p><span class="text-gray-400">Device ID:</span> <%= if @device_id !== nil, do: "Loaded ✅", else: "❌" %></p>
-              <p><span class="text-gray-400">Song Data:</span> <%= if @stream_url != nil, do: " Loaded ✅", else: "❌" %></p>
-            </div>
-            <div class="space-y-3">
-              <p><span class="text-gray-400">Current Track:</span><%= if @track_name !== nil, do: @track_name, else: "" %></p>
-              <p><span class="text-gray-400">Stream Count:</span> <%= @stream_count %></p>
-              <p><span class="text-gray-400">Token Expires in:</span> <%= if @expires_in !== nil, do: format_time(@expires_in), else: "00:00:00" %></p>
+          <!-- Bot Controls -->
+          <div class="bg-[#1E293B] rounded-lg p-4 md:p-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <button
+                phx-click="auth-flow"
+                class="bg-[#383737] h-20 px-6 py-4 rounded-lg sm:text-2xl md:text-3xl font-semibold transition transform border-black hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+              >
+                <i class="fa-solid fa-key mr-2"></i> Auth
+              </button>
+              <button
+                phx-click="start-timer"
+                disabled={@track_uri == nil || @track_name == nil}
+                class="bg-[#383737] h-20 px-6 py-4 rounded-lg sm:text-2xl md:text-3xl font-semibold transition transform border-black hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+              >
+                <i class="fa-solid fa-play mr-2"></i> Start Bot
+              </button>
+              <button
+                phx-click="kill-timer"
+                disabled={@stream_status == "Idle" || @stream_status == "Loading..."}
+                class="bg-[#383737] h-20 px-6 py-4 rounded-lg sm:text-2xl md:text-3xl font-semibold transition transform border-black hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+              >
+                <i class="fas fa-stop mr-2"></i> Stop Bot
+              </button>
             </div>
           </div>
-        </div>
 
-        <!-- Device ID / Player -->
-        <!-- This container required so that the SpotifyPlayer hook & event-handler can set the SpotifyPlayer device_ID into the socket state -->
-        <div id="spotify-player" data={@access_token} phx-hook="SpotifyPlayer" class="hidden bg-[#1E293B] rounded-lg p-4 md:p-6">
-          <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
-            <button
-              id="togglePlay"
-              class="w-full md:w-auto bg-[#383737] px-6 py-3 rounded-lg text-lg md:text-xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
-            >
-              Toggle Play
-            </button>
-            <button
-              id="playSDK"
-              class="w-full md:w-auto bg-[#383737] px-6 py-3 rounded-lg text-lg md:text-xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
-            >
-              Play
-            </button>
+          <!-- Status Panel -->
+          <div class="bg-[#1E293B] rounded-lg p-4 md:p-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+              <span class="text-2xl md:text-3xl font-medium">Status</span>
+              <span class={
+                "text-2xl md:text-2xl px-4 md:px-8 py-2 rounded-full font-bold #{
+                  cond do
+                    @stream_status == "Streaming" -> "bg-green-500"
+                    @stream_status == "Paused" -> "bg-red-400"
+                    true -> "bg-[#334155]"
+                  end
+                }"
+              }><%= @stream_status %></span>
+            </div>
+            <%!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-base md:text-3xl text-gray-300"> --%>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:text-xl md:text-3xl text-gray-300">
+              <div class="space-y-3">
+                <p><span class="text-gray-400">Auth Token:</span> <%= if @access_token, do: "✅", else: "❌" %></p>
+                <p><span class="text-gray-400">Device ID:</span> <%= if @device_id !== nil, do: "Loaded ✅", else: "❌" %></p>
+                <p><span class="text-gray-400">Song Data:</span> <%= if @stream_url != nil, do: " Loaded ✅", else: "❌" %></p>
+              </div>
+              <div class="space-y-3">
+                <p><span class="text-gray-400">Current Track:</span><%= if @track_name !== nil, do: @track_name, else: "" %></p>
+                <p><span class="text-gray-400">Stream Count:</span> <%= @stream_count %></p>
+                <p><span class="text-gray-400">Token Expires in:</span> <%= if @expires_in !== nil, do: format_time(@expires_in), else: "00:00:00" %></p>
+              </div>
+            </div>
           </div>
-        </div>
 
+          <!-- Device ID / Player -->
+          <!-- This container required so that the SpotifyPlayer hook & event-handler can set the SpotifyPlayer device_ID into the socket state -->
+          <div id="spotify-player" data={@access_token} phx-hook="SpotifyPlayer" class="hidden bg-[#1E293B] rounded-lg p-4 md:p-6">
+            <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
+              <button
+                id="togglePlay"
+                class="w-full md:w-auto bg-[#383737] px-6 py-3 rounded-lg text-lg md:text-xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+              >
+                Toggle Play
+              </button>
+              <button
+                id="playSDK"
+                class="w-full md:w-auto bg-[#383737] px-6 py-3 rounded-lg text-lg md:text-xl font-semibold transition transform hover:scale-105 hover:bg-[#444] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#383737]"
+              >
+                Play
+              </button>
+            </div>
+          </div>
+
+        </div>
       </div>
-    </div>
-  """
-end
+    """
+  end
 
-# * OLD UI for spotify Bot
-# def render(assigns) do
-#     ~H"""
-#       <div class='flex justify-center w-full bg-red-500 '>
-#       <h1>Spotify API access point </h1>
-#       <button phx-click="auth-flow">Authentication Flow </button>
-#       <button phx-click="start-timer">Start Timer </button>
-#       <button phx-click="kill-timer">Stop Timer </button>
-#       <button phx-click="play-music">Play song </button>
-#       </div>
-#       <h1>Spotify Web Playback SDK Quick Start</h1>
-#       <script src="https://sdk.scdn.co/spotify-player.js"></script>
-#       <div id="spotify-player" data={@access_token} phx-hook="SpotifyPlayer">
-#         <script id="sdk-script"></script>
-#         <button id="togglePlay">Toggle Play</button>
-#         <button id="playSDK">Play</button>
-#       </div>
-#     """
-#   end
-
+  # * OLD UI for spotify Bot
+  # def render(assigns) do
+  #     ~H"""
+  #       <div class='flex justify-center w-full bg-red-500 '>
+  #       <h1>Spotify API access point </h1>
+  #       <button phx-click="auth-flow">Authentication Flow </button>
+  #       <button phx-click="start-timer">Start Timer </button>
+  #       <button phx-click="kill-timer">Stop Timer </button>
+  #       <button phx-click="play-music">Play song </button>
+  #       </div>
+  #       <h1>Spotify Web Playback SDK Quick Start</h1>
+  #       <script src="https://sdk.scdn.co/spotify-player.js"></script>
+  #       <div id="spotify-player" data={@access_token} phx-hook="SpotifyPlayer">
+  #         <script id="sdk-script"></script>
+  #         <button id="togglePlay">Toggle Play</button>
+  #         <button id="playSDK">Play</button>
+  #       </div>
+  #     """
+  #   end
 
   # Mount is called when the LiveView is first rendered
   # Here we set up:
@@ -190,19 +189,49 @@ end
     if connected?(socket) do
       :timer.send_interval(1000, self(), :tick)
     end
+
     {:ok, assign(socket, countdown_time: 0, show_instructions: true)}
   end
 
- def handle_params(params, _uri, socket) do
+  def handle_params(params, _uri, socket) do
     case params["code"] do
       nil ->
         Logger.info(":code is nil ❌")
-        socket = assign(socket, code: nil, state: nil, access_token: nil, expires_in: nil, device_id: nil, track_uri: nil, track_name: nil, stream_count: 0, stream_url: nil, stream_status: "Idle", stream_time: nil)
+
+        socket =
+          assign(socket,
+            code: nil,
+            state: nil,
+            access_token: nil,
+            expires_in: nil,
+            device_id: nil,
+            track_uri: nil,
+            track_name: nil,
+            stream_count: 0,
+            stream_url: nil,
+            stream_status: "Idle",
+            stream_time: nil
+          )
+
         {:noreply, socket}
 
       _ ->
         Logger.info(":code in socket ✅")
-        socket = assign(socket, code: params["code"], state: params["state"], access_token: nil, expires_in: nil, device_id: nil, track_uri: nil, track_name: nil, stream_count: 0, stream_url: nil, stream_status: "Idle", stream_time: nil)
+
+        socket =
+          assign(socket,
+            code: params["code"],
+            state: params["state"],
+            access_token: nil,
+            expires_in: nil,
+            device_id: nil,
+            track_uri: nil,
+            track_name: nil,
+            stream_count: 0,
+            stream_url: nil,
+            stream_status: "Idle",
+            stream_time: nil
+          )
 
         GenServer.cast(self(), :fetch_token)
 
@@ -275,22 +304,23 @@ end
 
     # scope = "user-read-email user-read-private user-read-playback-state user-read-recently-played user-modify-playback-state streaming user-read-currently-playing"
     scope = "user-read-email user-read-private streaming user-read-currently-playing"
-    state = for _ <- 1..16, into: "", do: <<Enum.random('0123456789abcdef')>>
+    state = for _ <- 1..16, into: "", do: <<Enum.random(~c"0123456789abcdef")>>
     # state = for _ <- 1..16, into: "", do: <<Enum.random("0123456789abcdef")>>
 
-    query_params = [
-      response_type: "code",
-      client_id: System.get_env("CLIENT_ID"),
-      scope: scope,
-      redirect_uri: redirect_uri,
-      state: state
-    ]
-    |> URI.encode_query()
+    query_params =
+      [
+        response_type: "code",
+        client_id: System.get_env("CLIENT_ID"),
+        scope: scope,
+        redirect_uri: redirect_uri,
+        state: state
+      ]
+      |> URI.encode_query()
 
     res = HTTPoison.get("#{url}#{query_params}")
 
     case res do
-      {:ok , %{status_code: 200, body: _body}} ->
+      {:ok, %{status_code: 200, body: _body}} ->
         Logger.info("Auth successful ✅")
         # json_data = Jason.decode!(body)
         # IO.inspect(json_data)
@@ -303,20 +333,31 @@ end
       {:error, error} ->
         Logger.info(error)
         {:noreply, socket}
-      end
+    end
   end
 
   def handle_event("refresh-token", _params, socket) do
     url = "https://accounts.spotify.com/api/token"
     body = "grant_type=refresh_token&refresh_token=#{socket.assigns.refresh_token}"
-    headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
+
+    headers = [
+      {"Content-Type", "application/x-www-form-urlencoded"},
+      {"Authorization",
+       "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}
+    ]
 
     res = HTTPoison.post(url, body, headers)
+
     case res do
-      {:ok , %{status_code: 200, body: body}} ->
+      {:ok, %{status_code: 200, body: body}} ->
         Logger.info("Refreshed Token ✅")
         json_data = Jason.decode!(body)
-        {:noreply, assign(socket, access_token: json_data["access_token"], expires_in: json_data["expires_in"])}
+
+        {:noreply,
+         assign(socket,
+           access_token: json_data["access_token"],
+           expires_in: json_data["expires_in"]
+         )}
 
       {:ok, %{status_code: status_code, body: body}} ->
         Logger.info(status_code: status_code)
@@ -326,20 +367,26 @@ end
       {:error, error} ->
         Logger.info(error)
         {:noreply, socket}
-      end
+    end
   end
 
   def handle_event("play-music", _params, socket) do
     url = "https://api.spotify.com/v1/me/player/play?device_id=#{socket.assigns.device_id}"
-    headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}, {"Content-Type", "application/json"}]
+
+    headers = [
+      {"Authorization", "Bearer #{socket.assigns.access_token}"},
+      {"Content-Type", "application/json"}
+    ]
+
     # offset: is the position of the song in the album in array format starting at 0
-    body = '{
+    body = ~c'{
       "context_uri": "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
       "offset": {
           "position": 4
       },
       "position_ms": 0
     }'
+
     # body = Jason.encode!(%{
     #   context_uri: "spotify:album:5ht7ItJgpBH7W6vJ5BqpPr",
     #   offset: %{position: 4},
@@ -347,11 +394,15 @@ end
     # })
 
     res = HTTPoison.put(url, body, headers)
+
     case res do
-      {:ok , %{status_code: 204}} ->
+      {:ok, %{status_code: 204}} ->
         Logger.info("Playback started ✅")
-        socket = socket
-        |> assign(:stream_status, "Streaming")
+
+        socket =
+          socket
+          |> assign(:stream_status, "Streaming")
+
         {:noreply, socket}
 
       {:ok, %{status_code: 401}} ->
@@ -375,8 +426,9 @@ end
   def handle_event("get-devices", _params, socket) do
     url = "https://api.spotify.com/v1/me/player/devices"
     res = HTTPoison.get(url, [{"Authorization", "Bearer #{socket.assigns.access_token}"}])
+
     case res do
-      {:ok , %{status_code: 200, body: body}} ->
+      {:ok, %{status_code: 200, body: body}} ->
         Logger.info("Devices fetched ✅")
         IO.inspect(Jason.decode!(body))
         {:noreply, socket}
@@ -404,9 +456,9 @@ end
   # end
 
   def handle_info({:timeout, _data, :fetch_token}, socket) do
-        Logger.info("Token & Timer ✅")
-        play_song_on_a_loop(socket)
-        {:noreply, socket}
+    Logger.info("Token & Timer ✅")
+    play_song_on_a_loop(socket)
+    {:noreply, socket}
   end
 
   def handle_info({:timeout, _data, :loop_song}, socket) do
@@ -423,7 +475,7 @@ end
   end
 
   # ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-                                                  # Helper Functions
+  # Helper Functions
   # Create a timer function for when the access token expires or is nil it will trigger a new fetch and assign the the correct values from the %Token{} into the socket
   # This will then trigger another function to stream the song every 32 seconds and once that time is done trigger it to play again until the :access_token expires,
   # once the access token expires it will trigger the timer function again to fetch a new token and then play the song again (recursively)
@@ -445,19 +497,32 @@ end
     assign(socket, timer_ref: timer_ref)
   end
 
-
   def fetch_token(socket) do
     url = "https://accounts.spotify.com/api/token"
     redirect_uri = System.get_env("REDIRECT_URI") || "http://localhost:8080"
-    body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=#{redirect_uri}"
-    headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
+
+    body =
+      "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=#{redirect_uri}"
+
+    headers = [
+      {"Content-Type", "application/x-www-form-urlencoded"},
+      {"Authorization",
+       "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}
+    ]
+
     res = HTTPoison.post(url, body, headers)
 
     case res do
-      {:ok , %{status_code: 200, body: body}} ->
+      {:ok, %{status_code: 200, body: body}} ->
         Logger.info("Access Token ✅")
         json_data = Jason.decode!(body)
-        {:noreply, assign(socket, access_token: json_data["access_token"], expires_in: json_data["expires_in"], refresh_token: json_data["refresh_token"])}
+
+        {:noreply,
+         assign(socket,
+           access_token: json_data["access_token"],
+           expires_in: json_data["expires_in"],
+           refresh_token: json_data["refresh_token"]
+         )}
 
       {:ok, %{status_code: status_code, body: body}} ->
         Logger.info(status_code: status_code)
@@ -468,20 +533,32 @@ end
       {:error, error} ->
         Logger.info(error)
         {:noreply, socket}
-      end
+    end
   end
 
   def refresh_token(socket) do
     url = "https://accounts.spotify.com/api/token"
     body = "grant_type=refresh_token&refresh_token=#{socket.assigns.refresh_token}"
-    headers = [{"Content-Type", "application/x-www-form-urlencoded"}, {"Authorization", "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}]
+
+    headers = [
+      {"Content-Type", "application/x-www-form-urlencoded"},
+      {"Authorization",
+       "Basic #{Base.encode64("#{System.get_env("CLIENT_ID")}:#{System.get_env("CLIENT_SECRET")}")}"}
+    ]
 
     res = HTTPoison.post(url, body, headers)
+
     case res do
-      {:ok , %{status_code: 200, body: body}} ->
+      {:ok, %{status_code: 200, body: body}} ->
         Logger.info("Token Refreshed ✅")
         json_data = Jason.decode!(body)
-        {:noreply, assign(socket, access_token: json_data["access_token"], expires_in: json_data["expires_in"], stream_status: "Idle")}
+
+        {:noreply,
+         assign(socket,
+           access_token: json_data["access_token"],
+           expires_in: json_data["expires_in"],
+           stream_status: "Idle"
+         )}
 
       {:ok, %{status_code: status_code, body: body}} ->
         Logger.info(status_code: status_code)
@@ -491,7 +568,7 @@ end
       {:error, error} ->
         Logger.info(error)
         {:noreply, socket}
-      end
+    end
   end
 
   @doc """
@@ -507,7 +584,7 @@ end
   }
   ```
   """
-  #* Error handling: figure out how to prevent Song Data logic from loading true
+  # * Error handling: figure out how to prevent Song Data logic from loading true
   def fetch_track_data(socket, url) do
     case url_translator(url) do
       nil ->
@@ -516,6 +593,7 @@ end
 
       api_url ->
         Logger.info("URL format succesful ✅ ")
+
         headers = [
           {"Authorization", "Bearer #{socket.assigns.access_token}"},
           {"Content-Type", "application/json"}
@@ -524,7 +602,9 @@ end
         case HTTPoison.get(api_url, headers) do
           {:ok, %{status_code: 200, body: body}} ->
             track_data = Jason.decode!(body)
-            {:noreply, assign(socket, track_name: track_data["name"], track_uri: track_data["uri"])}
+
+            {:noreply,
+             assign(socket, track_name: track_data["name"], track_uri: track_data["uri"])}
 
           {:error, error} ->
             Logger.error("Failed to fetch song data: #{inspect(error)}")
@@ -535,26 +615,39 @@ end
 
   def play_song(socket) do
     url = "https://api.spotify.com/v1/me/player/play?device_id=#{socket.assigns.device_id}"
-    headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}, {"Content-Type", "application/json"}]
-    body = Jason.encode!(%{
-      uris: [socket.assigns.track_uri],
-      position_ms: 0
-    })
+
+    headers = [
+      {"Authorization", "Bearer #{socket.assigns.access_token}"},
+      {"Content-Type", "application/json"}
+    ]
+
+    body =
+      Jason.encode!(%{
+        uris: [socket.assigns.track_uri],
+        position_ms: 0
+      })
 
     res = HTTPoison.put(url, body, headers)
+
     case res do
-      {:ok , %{status_code: 204}} ->
+      {:ok, %{status_code: 204}} ->
         Logger.info("Playback started ✅")
-        socket = socket
-                |> play_song_on_a_loop()
-                |> assign(:stream_status, "Streaming")
+
+        socket =
+          socket
+          |> play_song_on_a_loop()
+          |> assign(:stream_status, "Streaming")
+
         {:noreply, socket}
 
-      {:ok , %{status_code: 202}} ->
+      {:ok, %{status_code: 202}} ->
         Logger.info("Play() not fully completed 🟠")
-        socket = socket
-                |> play_song_on_a_loop()
-                |> assign(:stream_status, "Streaming")
+
+        socket =
+          socket
+          |> play_song_on_a_loop()
+          |> assign(:stream_status, "Streaming")
+
         {:noreply, socket}
 
       {:ok, %{status_code: 401}} ->
@@ -580,14 +673,15 @@ end
     url = "https://api.spotify.com/v1/me/player/pause"
     headers = [{"Authorization", "Bearer #{socket.assigns.access_token}"}]
     res = HTTPoison.put(url, "", headers)
-    case res do
-      {:ok , %{status_code: 200}} ->
-        Logger.info("Paused process ✅")
-      {:noreply, socket}
 
-      {:ok , %{status_code: 202}} ->
+    case res do
+      {:ok, %{status_code: 200}} ->
+        Logger.info("Paused process ✅")
+        {:noreply, socket}
+
+      {:ok, %{status_code: 202}} ->
         Logger.info("Paused process with Issues 🟠")
-      {:noreply, socket}
+        {:noreply, socket}
 
       {:ok, %{status_code: status_code, body: _body}} ->
         Logger.info("Pause request error ❌")
@@ -619,8 +713,7 @@ end
     |> String.trim_trailing("=")
   end
 
-
-   # Authorization Code Flow fetch token // Single Grant token only this is why it is refreshing everytime
+  # Authorization Code Flow fetch token // Single Grant token only this is why it is refreshing everytime
   #  def handle_event("fetch-token", _params, socket) do
   #   url = "https://accounts.spotify.com/api/token"
   #   # body = "grant_type=authorization_code&code=#{socket.assigns.code}&redirect_uri=http://localhost:4000"
@@ -671,6 +764,4 @@ end
       nil -> nil
     end
   end
-
-
 end

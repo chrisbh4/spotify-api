@@ -227,7 +227,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
   def handle_event("set-device-id", %{"device_id" => device_id}, socket) do
     Logger.info("Device Event triggered")
-    IO.inspect(device_id, label: "Device ID")
     {:noreply, assign(socket, :device_id, device_id)}
   end
 
@@ -268,7 +267,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
 
   def handle_event("update-url", %{"value" => url}, socket) do
     # Process the URL (e.g., validate or store it)
-    Logger.info("Key Up: #{url}")
     {:noreply, assign(socket, :url, url)}
   end
 

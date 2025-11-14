@@ -489,7 +489,6 @@ defmodule SpotifyBotWeb.SpotifyLive do
   }
   ```
   """
-  # * Error handling: figure out how to prevent Song Data logic from loading true
   def fetch_track_data(socket, url) do
     case url_translator(url) do
       nil ->

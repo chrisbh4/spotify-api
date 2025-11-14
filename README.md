@@ -44,7 +44,7 @@ A sophisticated Spotify streaming automation bot built with **Phoenix LiveView**
    # Spotify API Credentials
    CLIENT_ID=your_spotify_client_id
    CLIENT_SECRET=your_spotify_client_secret
-   REDIRECT_URI=http://localhost:4000
+   REDIRECT_URI=http://localhost:8080
 
    # Database
    DATABASE_URL=ecto://username:password@localhost/spotify_bot_dev
@@ -64,13 +64,13 @@ A sophisticated Spotify streaming automation bot built with **Phoenix LiveView**
    mix phx.server
    ```
 
-Visit [`http://localhost:4000`](http://localhost:4000) to access the application.
+Visit [`http://localhost:8080`](http://localhost:8080) to access the application.
 
 ### Spotify App Configuration
 
 1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
 2. Create a new app or use existing one
-3. Add `http://localhost:4000` to Redirect URIs
+3. Add `http://localhost:8080` to Redirect URIs
 4. Copy your **Client ID** and **Client Secret** to your environment variables
 
 ## 🎯 How to Use
@@ -205,30 +205,3 @@ The development server includes live reloading for:
 - **Track Info**: `https://api.spotify.com/v1/tracks/{id}`
 - **Playback Control**: `https://api.spotify.com/v1/me/player/play`
 - **Device List**: `https://api.spotify.com/v1/me/player/devices`
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## ⚠️ Disclaimer
-
-This tool is for educational and personal use only. Please ensure you comply with Spotify's Terms of Service and avoid any activities that may violate their policies. The developers are not responsible for any misuse of this application.
-
-## 🙏 Acknowledgments
-
-- [Phoenix Framework](https://phoenixframework.org/) - Web development framework
-- [Spotify Web API](https://developer.spotify.com/documentation/web-api/) - Music streaming API
-- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
-- [Fly.io](https://fly.io/) - Application deployment platform
-
----
-
-Built with ❤️ using Phoenix LiveView
